@@ -7,7 +7,6 @@ import { findTenantByPublicEmbedId } from "@/lib/tenant-by-embed";
 import {
   normalizeStripeSubscriptionId,
   normalizeSubscriberEmail,
-  validateSubscriberIdForStripeConnect,
 } from "@/lib/subscriber-stripe";
 
 function corsHeaders(): HeadersInit {
@@ -59,10 +58,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const subCheck = validateSubscriberIdForStripeConnect(subscriberId);
-  if (!subCheck.ok) {
+  // Accept any non-empty subscriber id — tenants may use internal ids, not just cus_...
+  // Stripe customer id format is only required when actually calling Stripe (cancel-outcome).
+  if (subscriberId.length > MAX_ID_LEN) {
     return NextResponse.json(
-      { error: subCheck.error, hint: subCheck.hint },
+      { error: "subscriber_id_too_long", hint: `subscriberId must be ≤ ${MAX_ID_LEN} characters.` },
       { status: 400, headers: corsHeaders() },
     );
   }
