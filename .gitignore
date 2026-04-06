@@ -28,3 +28,12 @@ out/
 # OS / IDE
 .DS_Store
 Thumbs.db
+
+# Claude Code
+.claude/
+
+# UI baseline screenshots
+.ui-baseline-screenshots/
+
+# Product docs
+ChurnShield_Product_Document.docx
