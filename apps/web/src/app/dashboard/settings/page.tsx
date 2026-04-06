@@ -298,6 +298,7 @@ export default async function SettingsPage({
                 <PlansEditor
                   initialPlans={offerSettings.plans}
                   initialAllowDowngrade={offerSettings.allowPlanDowngrade}
+                  stripeConnected={!!tenant.stripeConnectId}
                 />
               </div>
             </div>
