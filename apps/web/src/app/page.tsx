@@ -493,7 +493,7 @@ export default function LandingPage() {
                 ],
               },
             ]}
-            buttonText="Start free  pay only when you save"
+            buttonText="Get started — free"
             onButtonClick={() => router.push("/sign-up")}
           />
 
