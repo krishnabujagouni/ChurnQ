@@ -18,7 +18,7 @@ interface HeroAction {
 interface HeroProps {
   badge?: {
     text: string;
-    action: {
+    action?: {
       text: string;
       href: string;
     };
