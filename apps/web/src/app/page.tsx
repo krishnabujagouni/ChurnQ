@@ -130,9 +130,9 @@ function ChatCard() {
       </div>
       {/* messages */}
       {[
-        { role: "ai",   text: "Hey! Before you go — we've loved having you. Can I ask what's not working?" },
+        { role: "ai",   text: "Hey! Before you go  we've loved having you. Can I ask what's not working?" },
         { role: "user", text: "It's too expensive for me right now." },
-        { role: "ai",   text: "Totally get it. How about 40% off for the next 3 months? That's just $17/mo — no commitment." },
+        { role: "ai",   text: "Totally get it. How about 40% off for the next 3 months? That's just $17/mo  no commitment." },
       ].map((m, i) => (
         <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 8 }}>
           <div style={{
@@ -167,7 +167,7 @@ function ChatCard() {
         letterSpacing: "-0.01em",
       }}>
         <HugeiconsIcon icon={CheckmarkCircle01Icon} size={16} strokeWidth={1.5} aria-hidden />
-        Claim 40% off — stay subscribed
+        Claim 40% off  stay subscribed
       </button>
     </div>
   );
@@ -254,13 +254,11 @@ export default function LandingPage() {
       <HeroSection
         badge={{
           text: "Retention automation for SaaS",
-          action: { text: "See live demo", href: "/test-app/index.html" },
         }}
         title="Stop losing revenue every time someone clicks cancel."
         description="ChurnShield intercepts cancel intent with a calm AI conversation, recovers failed payments, and flags who's about to leave before they do. One script tag, zero subscriptions."
         actions={[
           { text: "Start for free", href: "/sign-up", variant: "default" },
-          { text: "Live demo", href: "/test-app/index.html", variant: "glow" },
         ]}
       >
         <ChatCard />
@@ -402,7 +400,7 @@ export default function LandingPage() {
               {
                 title: "AI Cancel Agent",
                 meta: "40%+ save rate",
-                description: "Aria — our AI retention agent — intercepts every cancel click. Detects the subscriber's reason and presents a personalised offer  discount, pause, or plan change  in seconds.",
+                description: "Aria  our AI retention agent  intercepts every cancel click. Detects the subscriber's reason and presents a personalised offer  discount, pause, or plan change  in seconds.",
                 icon: <HugeiconsIcon icon={BubbleChatIcon} size={16} strokeWidth={1.5} style={{ color: "#18181b" }} />,
                 status: "Core",
                 tags: ["Cancel flow", "Aria AI Agent", "Personalised"],
@@ -495,7 +493,7 @@ export default function LandingPage() {
                 ],
               },
             ]}
-            buttonText="Start free — pay only when you save"
+            buttonText="Start free  pay only when you save"
             onButtonClick={() => router.push("/sign-up")}
           />
 
@@ -628,7 +626,7 @@ export default function LandingPage() {
 
       <ModemAnimatedFooter
         brandName="ChurnShield"
-        brandDescription="Stop losing revenue every time someone clicks cancel. AI-powered retention for SaaS founders — zero flat fee, pay only on results."
+        brandDescription="Stop losing revenue every time someone clicks cancel. AI-powered retention for SaaS founders  zero flat fee, pay only on results."
         socialLinks={[
           {
             icon: <HugeiconsIcon icon={Mail01Icon} size={20} strokeWidth={1.5} />,
@@ -640,7 +638,6 @@ export default function LandingPage() {
           { href: "#product", label: "Overview" },
           { href: "#features", label: "Features" },
           { href: "#pricing", label: "Pricing" },
-          { href: "/test-app/index.html", label: "Demo" },
           { href: "mailto:hello@churnshield.ai", label: "Contact" },
           { href: "#", label: "Privacy" },
           { href: "#", label: "Terms" },
