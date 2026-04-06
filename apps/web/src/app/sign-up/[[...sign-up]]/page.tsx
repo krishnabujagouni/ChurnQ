@@ -11,7 +11,8 @@ export default function SignUpPage() {
       <div style={{
         display: "none",
         flex: 1,
-        background: "#18181b",
+        background: "#ffffff",
+        borderRight: "1px solid #e4e4e7",
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "48px",
@@ -20,59 +21,51 @@ export default function SignUpPage() {
       }} className="auth-left-panel">
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: "white", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 36, height: 36, background: "#f4f4f5", borderRadius: 10, border: "1px solid #e4e4e7", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="22" height="22" viewBox="0 0 512 512" fill="none">
               <line x1="68" y1="400" x2="256" y2="88" stroke="#d4d4d8" strokeWidth="40" strokeLinecap="round"/>
               <line x1="68" y1="400" x2="444" y2="400" stroke="#d4d4d8" strokeWidth="40" strokeLinecap="round"/>
               <line x1="256" y1="88" x2="444" y2="400" stroke="#18181b" strokeWidth="40" strokeLinecap="round"/>
             </svg>
           </div>
-          <span style={{ color: "white", fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            <span style={{ color: "#a78bfa" }}>Churn</span>Shield
+          <span style={{ color: "#09090b", fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>
+            ChurnShield
           </span>
         </div>
 
         {/* Center content */}
         <div>
-          <p style={{ color: "#a1a1aa", fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>
+          <p style={{ color: "#71717a", fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 16 }}>
             Get started free
           </p>
-          <h2 style={{ color: "white", fontSize: 36, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.03em", marginBottom: 32 }}>
-            Turn cancellations<br />into conversations <br />not dead ends.
+          <h2 style={{ color: "#09090b", fontSize: 36, fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.03em", marginBottom: 32 }}>
+            Turn cancellations<br />into conversations —<br />not dead ends.
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {[
-              "One script tag  live in under 5 minutes",
+              "One script tag — live in under 5 minutes",
               "AI handles every cancel conversation for you",
               "Churn prediction flags at-risk subscribers early",
               "Pay nothing until we save a subscriber",
             ].map((item) => (
               <div key={item} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#27272a", border: "1px solid #3f3f46", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#f4f4f5", border: "1px solid #e4e4e7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 6l3 3 5-5" stroke="#18181b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <span style={{ color: "#d4d4d8", fontSize: 14 }}>{item}</span>
+                <span style={{ color: "#3f3f46", fontSize: 14 }}>{item}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Bottom */}
-        <div style={{ borderTop: "1px solid #27272a", paddingTop: 24 }}>
+        <div style={{ borderTop: "1px solid #e4e4e7", paddingTop: 24 }}>
           <p style={{ color: "#71717a", fontSize: 13, lineHeight: 1.6 }}>
             No credit card required. Connect Stripe and you're live.
           </p>
         </div>
-
-        {/* Background decoration */}
-        <div style={{
-          position: "absolute", top: "-20%", right: "-10%",
-          width: 400, height: 400, borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }} />
       </div>
 
       {/* Right form panel */}
@@ -90,7 +83,7 @@ export default function SignUpPage() {
             <h1 style={{ fontSize: 24, fontWeight: 700, color: "#09090b", letterSpacing: "-0.02em", marginBottom: 6 }}>
               Create your account
             </h1>
-            <p style={{ fontSize: 14, color: "#71717a" }}>Start saving subscribers  free, no card needed</p>
+            <p style={{ fontSize: 14, color: "#71717a" }}>Start saving subscribers — free, no card needed</p>
           </div>
           <SignUp appearance={{
             elements: {
@@ -99,7 +92,7 @@ export default function SignUpPage() {
               headerTitle: { display: "none" },
               headerSubtitle: { display: "none" },
               socialButtonsBlockButton: { borderRadius: 8, border: "1px solid #e4e4e7", fontWeight: 500 },
-              formButtonPrimary: { background: "#18181b", borderRadius: 8, fontWeight: 600, "&:hover": { background: "#09090b" } },
+              formButtonPrimary: { background: "#18181b", borderRadius: 8, fontWeight: 600 },
               footerActionLink: { color: "#18181b", fontWeight: 600 },
             },
           }} />
