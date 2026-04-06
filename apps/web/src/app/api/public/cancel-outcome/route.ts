@@ -205,7 +205,6 @@ async function applyStripeOffer(
   downgradeStripePriceId: string | null,
 ): Promise<{ applied: boolean; detail?: string }> {
   if (!_stripe)            return { applied: false, detail: "stripe_not_configured" };
-  if (!stripeConnectId)    return { applied: false, detail: "stripe_connect_not_linked" };
   if (offerType === "empathy") {
     return { applied: false, detail: "no_stripe_action_for_offer_type" };
   }
@@ -215,7 +214,9 @@ async function applyStripeOffer(
     return { applied: false, detail: `${idCheck.error}: ${idCheck.hint}` };
   }
 
-  const opts: Stripe.RequestOptions = { stripeAccount: stripeConnectId };
+  // When no Connect account is linked (e.g. during testing), operate on the
+  // platform's own Stripe account directly — no stripeAccount header.
+  const opts: Stripe.RequestOptions = stripeConnectId ? { stripeAccount: stripeConnectId } : {};
 
   try {
     let subscription: Stripe.Subscription;
