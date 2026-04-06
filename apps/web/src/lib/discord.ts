@@ -11,7 +11,7 @@ async function postToDiscord(webhookUrl: string, body: object): Promise<void> {
       body: JSON.stringify(body),
     });
   } catch {
-    // Non-blocking — never let Discord errors fail the main request
+    // Non-blocking  never let Discord errors fail the main request
   }
 }
 

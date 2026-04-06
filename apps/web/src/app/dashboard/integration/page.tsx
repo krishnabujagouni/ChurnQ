@@ -208,7 +208,7 @@ export default async function IntegrationPage() {
                       borderRadius: 6, padding: "7px 10px",
                       color: "#0f172a", wordBreak: "break-all", lineHeight: 1.5,
                     }}>
-                      {value || "—"}
+                      {value || ""}
                     </code>
                     <CopyButton text={value || ""} variant="inline" />
                   </div>

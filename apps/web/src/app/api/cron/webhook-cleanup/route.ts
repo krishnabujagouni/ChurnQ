@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// Vercel cron invokes this with a secret header — reject anything else.
+// Vercel cron invokes this with a secret header  reject anything else.
 function isAuthorized(req: Request): boolean {
   const auth = req.headers.get("authorization");
   const secret = process.env.CRON_SECRET;

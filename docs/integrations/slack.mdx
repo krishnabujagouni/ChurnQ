@@ -9,14 +9,14 @@ ChurnShield sends two types of alerts to Slack:
 
 | Alert | When it fires |
 |---|---|
-| **Subscriber retained** | Real-time — when a subscriber accepts an offer and clicks "Keep my subscription" |
-| **High-risk subscriber** | Daily — when the churn prediction job flags a subscriber with a high risk score |
+| **Subscriber retained** | Real-time  when a subscriber accepts an offer and clicks "Keep my subscription" |
+| **High-risk subscriber** | Daily  when the churn prediction job flags a subscriber with a high risk score |
 
 ---
 
 ## Before you connect
 
-Create a dedicated Slack channel first — we recommend `#churnshield-alerts`. During the OAuth flow, Slack will ask which channel to post to. You'll select this channel.
+Create a dedicated Slack channel first  we recommend `#churnshield-alerts`. During the OAuth flow, Slack will ask which channel to post to. You'll select this channel.
 
 <Tip>
   ChurnShield cannot create Slack channels automatically. Create the channel before clicking Connect.
@@ -44,7 +44,7 @@ Create a dedicated Slack channel first — we recommend `#churnshield-alerts`. D
 
 ### Subscriber retained
 ```
-✅ Subscriber retained — YourCompany
+✅ Subscriber retained  YourCompany
 
 Customer       cus_abc123
 Email          user@example.com
@@ -55,7 +55,7 @@ MRR saved      $36.75
 
 ### High-risk subscriber
 ```
-⚠️ High-risk subscriber detected — YourCompany
+⚠️ High-risk subscriber detected  YourCompany
 
 Customer       cus_xyz789
 Risk score     82% (high)
@@ -79,6 +79,6 @@ Go to **Dashboard → Connections** → click **Disconnect Slack**. ChurnShield 
     Check that the Slack row shows ● Connected. If not, click Authorize and reconnect. Also check that your Slack channel is still active and the ChurnShield app has not been removed from the workspace.
   </Accordion>
   <Accordion title="Alerts are going to the wrong channel">
-    Disconnect and reconnect — during the OAuth flow, select the correct channel.
+    Disconnect and reconnect  during the OAuth flow, select the correct channel.
   </Accordion>
 </AccordionGroup>

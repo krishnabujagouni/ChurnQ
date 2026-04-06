@@ -9,14 +9,14 @@ ChurnShield sends two types of alerts to Discord as rich embeds:
 
 | Alert | When it fires |
 |---|---|
-| **Subscriber retained** | Real-time — when a subscriber accepts an offer | Green embed |
-| **High-risk subscriber** | Daily — when the churn prediction job flags a subscriber | Amber embed |
+| **Subscriber retained** | Real-time  when a subscriber accepts an offer | Green embed |
+| **High-risk subscriber** | Daily  when the churn prediction job flags a subscriber | Amber embed |
 
 ---
 
 ## Before you connect
 
-Create a dedicated channel in your Discord server first — we recommend `churnshield-alerts`. During the OAuth flow, Discord will ask which server and channel to post to.
+Create a dedicated channel in your Discord server first  we recommend `churnshield-alerts`. During the OAuth flow, Discord will ask which server and channel to post to.
 
 <Tip>
   ChurnShield cannot create Discord channels automatically. Create the channel before clicking Connect.
@@ -44,7 +44,7 @@ Create a dedicated channel in your Discord server first — we recommend `churns
 
 ### Subscriber retained (green embed)
 ```
-✅ Subscriber retained — YourCompany
+✅ Subscriber retained  YourCompany
 ─────────────────────────────────────
 Customer        cus_abc123
 Email           user@example.com
@@ -55,7 +55,7 @@ MRR saved       $36.75
 
 ### High-risk subscriber (amber embed)
 ```
-⚠️ High-risk subscriber — YourCompany
+⚠️ High-risk subscriber  YourCompany
 ─────────────────────────────────────
 Customer        cus_xyz789
 Risk score      82% (high)
@@ -76,9 +76,9 @@ Go to **Dashboard → Connections** → click **Disconnect Discord**. ChurnShiel
 
 <AccordionGroup>
   <Accordion title="I'm not receiving alerts">
-    Check the Discord row shows ● Connected. If not, click Authorize and reconnect. Also verify the webhook hasn't been deleted from Discord — go to Server Settings → Integrations → Webhooks.
+    Check the Discord row shows ● Connected. If not, click Authorize and reconnect. Also verify the webhook hasn't been deleted from Discord  go to Server Settings → Integrations → Webhooks.
   </Accordion>
   <Accordion title="Alerts are going to the wrong channel">
-    Disconnect and reconnect — during the OAuth flow, select the correct server and channel.
+    Disconnect and reconnect  during the OAuth flow, select the correct server and channel.
   </Accordion>
 </AccordionGroup>

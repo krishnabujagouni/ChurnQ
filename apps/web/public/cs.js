@@ -514,11 +514,11 @@
     if (!offer || !offer.type) return null;
     if (offer.type === "discount" && offer.discountPct) {
       var months = offer.discountMonths ? " for " + offer.discountMonths + " month" + (offer.discountMonths > 1 ? "s" : "") : "";
-      return "Claim " + offer.discountPct + "% off" + months + " — stay subscribed";
+      return "Claim " + offer.discountPct + "% off" + months + "  stay subscribed";
     }
-    if (offer.type === "pause") return "Pause my subscription — stay subscribed";
-    if (offer.type === "extension") return "Claim free extension — stay subscribed";
-    if (offer.type === "downgrade") return "Switch to a smaller plan — stay subscribed";
+    if (offer.type === "pause") return "Pause my subscription  stay subscribed";
+    if (offer.type === "extension") return "Claim free extension  stay subscribed";
+    if (offer.type === "downgrade") return "Switch to a smaller plan  stay subscribed";
     return null;
   }
 

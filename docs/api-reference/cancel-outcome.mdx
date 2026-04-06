@@ -19,7 +19,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ## When to use this
 
-You typically do not need to poll this endpoint — the `returnUrl` you supplied to `/api/cancel-intent` receives `?cs_result=accepted` or `?cs_result=declined` when the subscriber finishes. Use this endpoint when:
+You typically do not need to poll this endpoint  the `returnUrl` you supplied to `/api/cancel-intent` receives `?cs_result=accepted` or `?cs_result=declined` when the subscriber finishes. Use this endpoint when:
 
 - You need to fetch the outcome server-side (e.g. in a webhook processor).
 - You want to retrieve the offer type that was presented and accepted.
@@ -37,7 +37,7 @@ You typically do not need to poll this endpoint — the `returnUrl` you supplied
 
 ## Response
 
-### 200 OK — decision made
+### 200 OK  decision made
 
 ```json
 {
@@ -57,7 +57,7 @@ You typically do not need to poll this endpoint — the `returnUrl` you supplied
 }
 ```
 
-### 200 OK — pending (subscriber has not decided yet)
+### 200 OK  pending (subscriber has not decided yet)
 
 ```json
 {
@@ -69,7 +69,7 @@ You typically do not need to poll this endpoint — the `returnUrl` you supplied
 }
 ```
 
-### 200 OK — expired
+### 200 OK  expired
 
 ```json
 {
@@ -166,7 +166,7 @@ const outcome = await res.json();
 if (outcome.status === "accepted") {
   console.log(`Offer accepted: ${outcome.offerType}`);
 } else if (outcome.status === "declined") {
-  console.log("Subscriber declined — subscription cancelled");
+  console.log("Subscriber declined  subscription cancelled");
 }
 ```
 
@@ -183,7 +183,7 @@ outcome = res.json()
 if outcome["status"] == "accepted":
     print(f"Offer accepted: {outcome['offerType']}")
 elif outcome["status"] == "declined":
-    print("Subscriber declined — subscription cancelled")
+    print("Subscriber declined  subscription cancelled")
 ```
 </CodeGroup>
 

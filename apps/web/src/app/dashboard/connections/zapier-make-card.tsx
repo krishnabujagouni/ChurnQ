@@ -35,7 +35,7 @@ const CONFIG: Record<Platform, {
     deepLink: "https://www.make.com/en/login",
     instruction: "In Make: New scenario → Webhooks module → Custom webhook → Create → copy the URL Make gives you → paste it below.",
     logo: (
-      /* Official Make logomark — three filled circles in a triangle arrangement */
+      /* Official Make logomark  three filled circles in a triangle arrangement */
       <svg width="20" height="20" viewBox="0 0 300 300" fill="white">
         <circle cx="150" cy="80"  r="44" />
         <circle cx="72"  cy="210" r="44" />
@@ -190,7 +190,7 @@ function PlatformCard({ platform, existingEndpoint }: { platform: Platform; exis
             /* ── Setup flow ── */
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
-              {/* Step 1 — open platform */}
+              {/* Step 1  open platform */}
               <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <Step n={1} />
                 <div style={{ flex: 1 }}>
@@ -220,7 +220,7 @@ function PlatformCard({ platform, existingEndpoint }: { platform: Platform; exis
                 </div>
               </div>
 
-              {/* Step 2 — paste URL */}
+              {/* Step 2  paste URL */}
               <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                 <Step n={2} />
                 <div style={{ flex: 1 }}>
@@ -264,7 +264,7 @@ function PlatformCard({ platform, existingEndpoint }: { platform: Platform; exis
               border: "1px solid var(--cs-border, #e4e4e7)",
               borderRadius: 10, overflow: "hidden",
             }}>
-              {/* Endpoint row — same style as webhook endpoint list */}
+              {/* Endpoint row  same style as webhook endpoint list */}
               <div style={{
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "12px 16px",

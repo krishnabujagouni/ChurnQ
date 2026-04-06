@@ -55,7 +55,7 @@ export const limiters = {
   pause:            makeLimiter(3,   "1 h",  "pause"),
   // Identifier: snippetKey:subscriberId
   subscriberStatus: makeLimiter(60,  "1 m",  "subscriber-status"),
-  // Identifier: tenantId:endpointId — prevent spamming test events
+  // Identifier: tenantId:endpointId  prevent spamming test events
   webhookTest:      makeLimiter(5,   "1 m",  "webhook-test"),
 } as const;
 

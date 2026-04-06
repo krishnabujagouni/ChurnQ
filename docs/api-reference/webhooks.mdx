@@ -89,7 +89,7 @@ POST /api/webhooks
 | `high_risk.detected` | AI flags subscriber as high churn risk |
 | `webhook.test` | Manual test ping |
 
-### Response — 201 Created
+### Response  201 Created
 
 ```json
 {
@@ -103,7 +103,7 @@ POST /api/webhooks
 }
 ```
 
-The `secret` field is **only returned at creation time**. Store it securely — it cannot be retrieved again.
+The `secret` field is **only returned at creation time**. Store it securely  it cannot be retrieved again.
 
 ### Error responses
 
@@ -137,7 +137,7 @@ Partially update an endpoint. Only the fields you include are changed.
 | `enabled` | `boolean` | Enable or disable the endpoint |
 | `events` | `string[]` | Replace the subscribed events list |
 
-### Response — 200 OK
+### Response  200 OK
 
 ```json
 {
@@ -160,7 +160,7 @@ DELETE /api/webhooks/{id}
 
 Permanently deletes the endpoint and all its delivery logs.
 
-### Response — 200 OK
+### Response  200 OK
 
 ```json
 { "ok": true }
@@ -182,7 +182,7 @@ POST /api/webhooks/{id}/test
 
 Fires a `webhook.test` event to the endpoint immediately. Rate-limited to **5 requests per minute** per endpoint.
 
-### Response — 200 OK
+### Response  200 OK
 
 ```json
 {
@@ -198,7 +198,7 @@ Fires a `webhook.test` event to the endpoint immediately. Rate-limited to **5 re
 | Status | Code | Description |
 |--------|------|-------------|
 | `404` | `not_found` | Endpoint does not exist |
-| `400` | `endpoint_disabled` | Endpoint is disabled — enable it before testing |
+| `400` | `endpoint_disabled` | Endpoint is disabled  enable it before testing |
 | `429` | `rate_limited` | More than 5 test requests in the last minute |
 
 ---

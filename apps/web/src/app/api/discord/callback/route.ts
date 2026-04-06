@@ -8,7 +8,7 @@ function appOrigin(request: Request): string {
   return new URL(request.url).origin;
 }
 
-/** Discord OAuth redirect_uri — exchanges code, saves webhook URL + channel name on the tenant. */
+/** Discord OAuth redirect_uri  exchanges code, saves webhook URL + channel name on the tenant. */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const base = appOrigin(request);

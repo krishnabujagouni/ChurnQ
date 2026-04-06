@@ -47,7 +47,7 @@ export function ZapierConnectRow() {
           <div style={{ fontSize: 12, color: "var(--cs-text-muted, #71717a)", lineHeight: 1.5 }}>
             Automate ChurnShield events in 5,000+ apps using{" "}
             <strong style={{ fontWeight: 600, color: "var(--cs-text, #3f3f46)" }}>Webhooks by Zapier</strong> (Catch Hook).
-            No separate Zapier app required — we POST signed JSON to your hook URL.
+            No separate Zapier app required  we POST signed JSON to your hook URL.
           </div>
         </div>
 
@@ -142,7 +142,7 @@ export function ZapierConnectRow() {
               <code style={{ background: "#e4e4e7", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>
                 X-ChurnShield-Signature
               </code>{" "}
-              (HMAC-SHA256 of the raw body) — use a Code step if you need to verify it.
+              (HMAC-SHA256 of the raw body)  use a Code step if you need to verify it.
             </li>
           </ol>
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--cs-border, #e4e4e7)" }}>

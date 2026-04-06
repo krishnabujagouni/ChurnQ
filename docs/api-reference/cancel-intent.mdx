@@ -79,7 +79,7 @@ If you already know why the subscriber is cancelling (e.g. they selected a reaso
 |-------|------|-------------|
 | `id` | `string` | Unique ID of the cancel intent |
 | `url` | `string` | Redirect the subscriber to this URL to show the offer page |
-| `expiresAt` | `string` | ISO 8601 timestamp — the URL expires after 30 minutes |
+| `expiresAt` | `string` | ISO 8601 timestamp  the URL expires after 30 minutes |
 
 ### Error responses
 
@@ -89,7 +89,7 @@ If you already know why the subscriber is cancelling (e.g. they selected a reaso
 | `401` | `unauthorized` | Missing or invalid API key |
 | `404` | `subscription_not_found` | The subscription ID does not exist in the connected Stripe account |
 | `409` | `already_cancelled` | The subscription is already cancelled |
-| `429` | `rate_limited` | Too many requests — max 100/min per tenant |
+| `429` | `rate_limited` | Too many requests  max 100/min per tenant |
 
 Error body:
 
@@ -174,5 +174,5 @@ Creating a cancel intent fires the `cancel_intent.created` event to all enabled 
 ## Notes
 
 - The offer URL is **single-use** and expires after **30 minutes**. If the subscriber does not visit it in time, call this endpoint again to generate a new one.
-- ChurnShield uses the subscriber's Stripe data (plan name, MRR, subscription age) to personalise the offer — no additional data is needed.
+- ChurnShield uses the subscriber's Stripe data (plan name, MRR, subscription age) to personalise the offer  no additional data is needed.
 - Passing the same `subscriptionId` twice within the expiry window returns the existing intent rather than creating a duplicate.

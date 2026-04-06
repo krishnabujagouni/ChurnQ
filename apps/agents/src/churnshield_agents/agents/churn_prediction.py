@@ -199,7 +199,7 @@ async def _send_slack_high_risk(webhook_url: str, tenant_name: str, sub: dict[st
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f":warning: *High-risk subscriber detected — {tenant_name}*",
+                    "text": f":warning: *High-risk subscriber detected  {tenant_name}*",
                 },
             },
             {
@@ -303,13 +303,13 @@ def _deliver_webhook_with_log(
             last_http = status
             response_preview = chunk.decode("utf-8", errors="replace")[:512] if chunk else None
             if status is not None and 300 <= status < 400:
-                last_err = "HTTP %d redirect — use the direct URL (redirects are not followed)" % status
+                last_err = "HTTP %d redirect  use the direct URL (redirects are not followed)" % status
             elif status is not None and 200 <= status < 300:
                 ok = True
                 break
             elif status == 404:
                 last_err = (
-                    "HTTP 404 — no POST handler at this path (wrong token in the URL, typo, or expired URL)"
+                    "HTTP 404  no POST handler at this path (wrong token in the URL, typo, or expired URL)"
                 )
             else:
                 last_err = f"HTTP {status}" if status is not None else "no_status"

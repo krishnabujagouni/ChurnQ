@@ -38,7 +38,7 @@ Slack + Discord + Webhooks fire
 | **Discount** | Repeating coupon applied for 3 months | After first discounted invoice pays |
 | **Pause** | Subscription pause_collection set | Immediately on save |
 | **Extension** | Negative customer balance credit (2 weeks) | After next invoice pays |
-| **Empathy** | No Stripe action — conversation alone worked | Immediately on save |
+| **Empathy** | No Stripe action  conversation alone worked | Immediately on save |
 | **Downgrade** | No Stripe action (requires plan mapping) | Not yet implemented |
 
 ---
@@ -53,7 +53,7 @@ Every cancel attempt creates a `SaveSession` row. The session tracks:
 - The MRR value saved
 - The ChurnShield fee (15% of saved MRR)
 
-For **discount** and **extension** offers, the fee is confirmed after Stripe sends `invoice.paid` — this is how ChurnShield verifies the subscriber actually paid at the new rate before charging you.
+For **discount** and **extension** offers, the fee is confirmed after Stripe sends `invoice.paid`  this is how ChurnShield verifies the subscriber actually paid at the new rate before charging you.
 
 ---
 
@@ -67,13 +67,13 @@ ChurnShield charges 15% of the MRR retained, per save. Examples:
 | $99/mo | Pause (full MRR) | $99.00 | $14.85 |
 | $199/mo | Empathy only | $199.00 | $29.85 |
 
-Fees are charged to your Stripe account automatically — no invoices, no manual billing.
+Fees are charged to your Stripe account automatically  no invoices, no manual billing.
 
 ---
 
 ## Grace mode vs secured mode
 
-When you first install the snippet, it runs in **grace mode** — ChurnShield accepts cancel intents without requiring an HMAC signature. This lets you test quickly.
+When you first install the snippet, it runs in **grace mode**  ChurnShield accepts cancel intents without requiring an HMAC signature. This lets you test quickly.
 
 Before going live, you must **activate signing** in Dashboard → Integration. Once activated, every cancel intent requires a valid HMAC-SHA256 signature. See the [HMAC signing guide](/configuration/hmac-signing).
 

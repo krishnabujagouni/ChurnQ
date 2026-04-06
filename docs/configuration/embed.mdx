@@ -98,8 +98,8 @@ When ChurnShield redirects back to your `returnUrl`, it appends a query paramete
 
 | Parameter | Value | Meaning |
 |-----------|-------|---------|
-| `cs_result` | `accepted` | Subscriber accepted the offer — subscription saved |
-| `cs_result` | `declined` | Subscriber declined — subscription cancelled |
+| `cs_result` | `accepted` | Subscriber accepted the offer  subscription saved |
+| `cs_result` | `declined` | Subscriber declined  subscription cancelled |
 
 Use this to show a confirmation message:
 
@@ -128,7 +128,7 @@ ChurnShield has a **test mode** that works with Stripe's test-mode customers and
 
 1. Use a Stripe test customer (`cus_...`) and subscription (`sub_...`).
 2. Call `/api/cancel-intent` with your API key.
-3. The ChurnShield offer page will display — accepting or declining will exercise the full flow without charging real money.
+3. The ChurnShield offer page will display  accepting or declining will exercise the full flow without charging real money.
 
 <Tip>
   Keep a Stripe test subscription handy during development. You can create one in the [Stripe Dashboard → Subscriptions](https://dashboard.stripe.com/test/subscriptions).
@@ -224,7 +224,7 @@ ChurnShield has a **test mode** that works with Stripe's test-mode customers and
   </Accordion>
 
   <Accordion title="The offer page shows 'Subscription not found'">
-    Verify that the `subscriptionId` you pass belongs to the Stripe account connected to your ChurnShield tenant. Also ensure the subscription is in `active` or `trialing` state — ChurnShield does not intercept already-cancelled subscriptions.
+    Verify that the `subscriptionId` you pass belongs to the Stripe account connected to your ChurnShield tenant. Also ensure the subscription is in `active` or `trialing` state  ChurnShield does not intercept already-cancelled subscriptions.
   </Accordion>
 
   <Accordion title="The user is sent back to the wrong URL">

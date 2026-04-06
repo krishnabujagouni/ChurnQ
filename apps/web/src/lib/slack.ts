@@ -11,7 +11,7 @@ async function postToSlack(webhookUrl: string, body: object): Promise<void> {
       body: JSON.stringify(body),
     });
   } catch {
-    // Non-blocking — never let Slack errors fail the main request
+    // Non-blocking  never let Slack errors fail the main request
   }
 }
 

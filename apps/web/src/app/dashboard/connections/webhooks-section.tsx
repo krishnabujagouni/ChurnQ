@@ -517,7 +517,7 @@ export function WebhooksSection({ initial }: { initial: Endpoint[] }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "var(--cs-text, #18181b)", marginBottom: 2 }}>Webhooks</div>
           <div style={{ fontSize: 12, color: "var(--cs-text-muted, #71717a)" }}>
-            Send real-time HTTP POST events to any URL — paste a{" "}
+            Send real-time HTTP POST events to any URL  paste a{" "}
             <strong style={{ fontWeight: 600, color: "var(--cs-text, #52525b)" }}>Zapier Catch Hook</strong> URL, or use
             HubSpot and custom endpoints.
           </div>

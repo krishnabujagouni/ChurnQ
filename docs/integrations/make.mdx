@@ -25,7 +25,7 @@ Make does not have a native ChurnShield module, but every Make scenario can expo
 
     Select **Custom webhook** as the trigger, then click **Add** to create a new webhook.
 
-    Give it a name (e.g. `ChurnShield`) and click **Save**. Make will generate a unique URL — copy it.
+    Give it a name (e.g. `ChurnShield`) and click **Save**. Make will generate a unique URL  copy it.
   </Step>
 
   <Step title="Paste the URL into ChurnShield">
@@ -37,7 +37,7 @@ Make does not have a native ChurnShield module, but every Make scenario can expo
   </Step>
 
   <Step title="Test the connection">
-    In Make, click **Run once** — the scenario enters "waiting for data" mode.
+    In Make, click **Run once**  the scenario enters "waiting for data" mode.
 
     Back in ChurnShield, click the **Test** button (play icon) next to the Make endpoint.
 
@@ -45,11 +45,11 @@ Make does not have a native ChurnShield module, but every Make scenario can expo
   </Step>
 
   <Step title="Add actions to your scenario">
-    With the schema loaded, add action modules to your scenario — for example:
-    - **Google Sheets** — append a row
-    - **Slack** — send a message
-    - **Gmail** — send an email
-    - **HTTP** — call any external API
+    With the schema loaded, add action modules to your scenario  for example:
+    - **Google Sheets**  append a row
+    - **Slack**  send a message
+    - **Gmail**  send an email
+    - **HTTP**  call any external API
 
     Click **Save** and turn the scenario **On**.
   </Step>
@@ -90,7 +90,7 @@ All requests include two headers:
 | Header | Value |
 |--------|-------|
 | `X-ChurnShield-Event` | Event name, e.g. `cancel_intent.created` |
-| `X-ChurnShield-Signature` | `sha256=<hmac-hex>` — used to verify authenticity |
+| `X-ChurnShield-Signature` | `sha256=<hmac-hex>`  used to verify authenticity |
 
 See [HMAC Signing](/configuration/hmac-signing) for verification details.
 
@@ -135,7 +135,7 @@ The webhook module shows the raw JSON body ChurnShield sent.
   </Accordion>
 
   <Accordion title="My scenario is not triggering on live events">
-    Check that the scenario is **turned on** (toggle is green in Make). If it is on, open **History** and check for any failed runs — the error message will indicate what went wrong.
+    Check that the scenario is **turned on** (toggle is green in Make). If it is on, open **History** and check for any failed runs  the error message will indicate what went wrong.
   </Accordion>
 
   <Accordion title="How do I verify the signature in Make?">

@@ -8,98 +8,98 @@
 **Read this block first** when picking up the repo; it summarizes implementation not obvious from file names alone.
 
 ### Zapier + Make connections (April 6, 2026)
-- **`apps/web/src/app/dashboard/connections/zapier-make-card.tsx`** — Two platform cards (Zapier + Make) rendered inside the connections page integration list card, same row layout as Stripe/Slack/Discord.
+- **`apps/web/src/app/dashboard/connections/zapier-make-card.tsx`**  Two platform cards (Zapier + Make) rendered inside the connections page integration list card, same row layout as Stripe/Slack/Discord.
 - **Flow**: User clicks "Connect" → panel expands inline → user opens Zapier/Make in new tab → creates a Catch Hook / Custom Webhook → copies the URL → pastes it back → clicks Save. ChurnShield creates a labeled webhook endpoint (`label: "zapier"` or `"make"`) and stores it in `webhook_endpoints`.
-- **Connected state**: shows URL (truncated monospace), Copy URL button, "Send test event" button (turns green on success), "Disconnect" button — all in a bordered card matching the webhook endpoint list style.
+- **Connected state**: shows URL (truncated monospace), Copy URL button, "Send test event" button (turns green on success), "Disconnect" button  all in a bordered card matching the webhook endpoint list style.
 - **Labels**: `WebhookEndpoint.label` field (`String? @db.VarChar(32)`) distinguishes Zapier/Make endpoints from custom ones. `label` added to Prisma schema + `npx prisma db push` run. API routes (`GET /api/webhooks`, `POST /api/webhooks`) return/accept `label` field.
-- **One connection per platform**: `page.tsx` uses `find(e => e.label === "zapier")` — one labeled endpoint per platform. Users needing multiple endpoints use the Custom Webhooks section.
+- **One connection per platform**: `page.tsx` uses `find(e => e.label === "zapier")`  one labeled endpoint per platform. Users needing multiple endpoints use the Custom Webhooks section.
 - **Zapier deep link**: `https://zapier.com/app/editor`. **Make deep link**: `https://www.make.com/en/login`.
-- **Tested and working** ✅ — Zapier connected, test event received. Make connected, test payload confirmed in scenario run (`event: webhook.test`, `data.test: true`, `data.source: churnshield_dashboard`).
+- **Tested and working** ✅  Zapier connected, test event received. Make connected, test payload confirmed in scenario run (`event: webhook.test`, `data.test: true`, `data.source: churnshield_dashboard`).
 
 ### Webhook hardening + minor fixes (April 6, 2026)
-- **Python timestamp normalized** — `churn_prediction.py` now produces `2025-04-05T12:00:00.123Z` (milliseconds + `Z`) matching TypeScript's `new Date().toISOString()` exactly. Previously used Python's `.isoformat()` which produces `+00:00` suffix.
-- **Rate limit on webhook test endpoint** — `webhookTest` limiter added to `apps/web/src/lib/rate-limit.ts` (5 requests per minute per `tenantId:endpointId`). Wired into `POST /api/webhooks/[id]/test`. Fails open if Upstash Redis not configured.
-- **Delivery log cleanup cron** — `GET /api/cron/webhook-cleanup` deletes `webhook_deliveries` rows older than 15 days. Runs daily at 3am UTC via Vercel cron (`vercel.json`). Secured with `CRON_SECRET` header (`Authorization: Bearer <secret>`). Set `CRON_SECRET` in Vercel environment variables — Vercel injects it automatically for cron routes.
-- **Slack/Discord OAuth callback hardened** — `tokenRes.json()` wrapped in try/catch in both `slack/callback/route.ts` and `discord/callback/route.ts`. If Slack/Discord is unreachable or returns non-JSON, redirects back to settings with `token_exchange_failed` error param instead of crashing 500.
-- **Slack/Discord disconnect hardened** — Prisma `update` wrapped in try/catch in both disconnect routes. Returns clean 404 if tenant row doesn't exist (P2025) instead of unhandled crash.
-- **Webhook toggle rollback** — `handleToggle` in `webhooks-section.tsx` now rolls back optimistic UI state if the PATCH request fails. Before: failed API call left toggle in wrong visual state permanently.
-- **Slack/Discord channel name removed from button area** — channel name (`#new-channel`) was showing next to the Disconnect button. Removed from both `slack-connect-card.tsx` and `discord-connect-card.tsx`. Channel already shown in `● Connected · #channel` badge on the left side of the row.
-- **All connect buttons unified** — Stripe "Connect", Slack "Authorize", Discord "Authorize", Zapier "Connect", Make "Connect", Webhooks "Connect" all use same black `#18181b` style.
+- **Python timestamp normalized**  `churn_prediction.py` now produces `2025-04-05T12:00:00.123Z` (milliseconds + `Z`) matching TypeScript's `new Date().toISOString()` exactly. Previously used Python's `.isoformat()` which produces `+00:00` suffix.
+- **Rate limit on webhook test endpoint**  `webhookTest` limiter added to `apps/web/src/lib/rate-limit.ts` (5 requests per minute per `tenantId:endpointId`). Wired into `POST /api/webhooks/[id]/test`. Fails open if Upstash Redis not configured.
+- **Delivery log cleanup cron**  `GET /api/cron/webhook-cleanup` deletes `webhook_deliveries` rows older than 15 days. Runs daily at 3am UTC via Vercel cron (`vercel.json`). Secured with `CRON_SECRET` header (`Authorization: Bearer <secret>`). Set `CRON_SECRET` in Vercel environment variables  Vercel injects it automatically for cron routes.
+- **Slack/Discord OAuth callback hardened**  `tokenRes.json()` wrapped in try/catch in both `slack/callback/route.ts` and `discord/callback/route.ts`. If Slack/Discord is unreachable or returns non-JSON, redirects back to settings with `token_exchange_failed` error param instead of crashing 500.
+- **Slack/Discord disconnect hardened**  Prisma `update` wrapped in try/catch in both disconnect routes. Returns clean 404 if tenant row doesn't exist (P2025) instead of unhandled crash.
+- **Webhook toggle rollback**  `handleToggle` in `webhooks-section.tsx` now rolls back optimistic UI state if the PATCH request fails. Before: failed API call left toggle in wrong visual state permanently.
+- **Slack/Discord channel name removed from button area**  channel name (`#new-channel`) was showing next to the Disconnect button. Removed from both `slack-connect-card.tsx` and `discord-connect-card.tsx`. Channel already shown in `● Connected · #channel` badge on the left side of the row.
+- **All connect buttons unified**  Stripe "Connect", Slack "Authorize", Discord "Authorize", Zapier "Connect", Make "Connect", Webhooks "Connect" all use same black `#18181b` style.
 
 ### Webhooks (April 5, 2026)
-- **`WebhookEndpoint` model** added to Prisma schema (`webhook_endpoints` table). Fields: `id`, `tenantId`, `url` (varchar 2048), `events` (String[] — subset of `["save.created","high_risk.detected"]`), `secret` (varchar 128, `whsec_...` prefix), `enabled` (bool), `createdAt`. Run `npx prisma db push` to sync (already done).
-- **`apps/web/src/lib/webhooks.ts`** — `fireWebhooks(tenantId, event, data)`: queries enabled endpoints for the event, signs payload with HMAC-SHA256, POSTs with `X-ChurnShield-Signature: sha256=<hex>` + `X-ChurnShield-Event` headers, retries 3× (1.5s, 3s backoff). Fully non-blocking (never throws). `generateWebhookSecret()` produces `whsec_<32 random bytes hex>`.
+- **`WebhookEndpoint` model** added to Prisma schema (`webhook_endpoints` table). Fields: `id`, `tenantId`, `url` (varchar 2048), `events` (String[]  subset of `["save.created","high_risk.detected"]`), `secret` (varchar 128, `whsec_...` prefix), `enabled` (bool), `createdAt`. Run `npx prisma db push` to sync (already done).
+- **`apps/web/src/lib/webhooks.ts`**  `fireWebhooks(tenantId, event, data)`: queries enabled endpoints for the event, signs payload with HMAC-SHA256, POSTs with `X-ChurnShield-Signature: sha256=<hex>` + `X-ChurnShield-Event` headers, retries 3× (1.5s, 3s backoff). Fully non-blocking (never throws). `generateWebhookSecret()` produces `whsec_<32 random bytes hex>`.
 - **Payload format**: `{ event, timestamp: ISO8601, data: { ...fields } }`. Same envelope for all events.
 - **Events fired**:
-  - `save.created` — in `cancel-outcome/route.ts` after every accepted offer (non-blocking, after Slack/Discord alerts). Payload: `tenant_id`, `subscriber_id`, `subscriber_email`, `offer_type`, `discount_pct`, `mrr_saved`.
-  - `high_risk.detected` — in `churn_prediction.py` per high-risk subscriber after Slack/Discord. Python queries `webhook_endpoints` directly (same DB), signs with stdlib `hmac` + `hashlib`, fires via `urllib.request`. Payload: `tenant_id`, `subscriber_id`, `risk_score`, `risk_class`, `cancel_attempts`, `failed_payments`, `days_since_activity`.
+  - `save.created`  in `cancel-outcome/route.ts` after every accepted offer (non-blocking, after Slack/Discord alerts). Payload: `tenant_id`, `subscriber_id`, `subscriber_email`, `offer_type`, `discount_pct`, `mrr_saved`.
+  - `high_risk.detected`  in `churn_prediction.py` per high-risk subscriber after Slack/Discord. Python queries `webhook_endpoints` directly (same DB), signs with stdlib `hmac` + `hashlib`, fires via `urllib.request`. Payload: `tenant_id`, `subscriber_id`, `risk_score`, `risk_class`, `cancel_attempts`, `failed_payments`, `days_since_activity`.
 - **API routes**:
-  - `GET /api/webhooks` — list tenant's endpoints (auth: Clerk).
-  - `POST /api/webhooks` — create endpoint (validates URL, events, max 10 per tenant).
-  - `DELETE /api/webhooks/[id]` — delete (ownership checked).
+  - `GET /api/webhooks`  list tenant's endpoints (auth: Clerk).
+  - `POST /api/webhooks`  create endpoint (validates URL, events, max 10 per tenant).
+  - `DELETE /api/webhooks/[id]`  delete (ownership checked).
 - **UI** (`apps/web/src/app/dashboard/connections/webhooks-section.tsx`):
-  - Row inside the Connections page integration list card — same icon/name/desc/button layout as Stripe, Slack, Discord.
+  - Row inside the Connections page integration list card  same icon/name/desc/button layout as Stripe, Slack, Discord.
   - "Connect" button (black) → expands inline panel with add-endpoint form (URL input + event checkboxes) + list of existing endpoints.
   - "Manage" button shown when endpoints already exist; "Close" collapses.
   - Each endpoint shows: URL, event badge pills, signing secret (masked, reveal/copy buttons), remove button.
-  - Collapsible "View example payloads" showing JSON shape for both events — for developers wiring their handler.
-- **Testing**: Use [webhook.site](https://webhook.site) — paste the free unique URL as the endpoint URL, trigger a save or run the churn prediction agent to see signed POSTs arrive.
-- **Zapier**: Once webhooks are working, tenants can connect to Zapier/Make immediately via "Webhooks by Zapier" (catch hook) — no native Zapier app needed. Native app is a later polish step.
+  - Collapsible "View example payloads" showing JSON shape for both events  for developers wiring their handler.
+- **Testing**: Use [webhook.site](https://webhook.site)  paste the free unique URL as the endpoint URL, trigger a save or run the churn prediction agent to see signed POSTs arrive.
+- **Zapier**: Once webhooks are working, tenants can connect to Zapier/Make immediately via "Webhooks by Zapier" (catch hook)  no native Zapier app needed. Native app is a later polish step.
 
 ### Connections page refactor (April 5, 2026)
-- **New page** at `/dashboard/connections` (`apps/web/src/app/dashboard/connections/page.tsx`). Server component — fetches tenant + webhookEndpoints in one query.
-- **Layout**: YouForm-style flat list — single card with rows for Stripe, Slack, Discord, Webhooks. Each row: 44px icon circle + name/desc left, button right, dividers between rows.
+- **New page** at `/dashboard/connections` (`apps/web/src/app/dashboard/connections/page.tsx`). Server component  fetches tenant + webhookEndpoints in one query.
+- **Layout**: YouForm-style flat list  single card with rows for Stripe, Slack, Discord, Webhooks. Each row: 44px icon circle + name/desc left, button right, dividers between rows.
 - **Stripe row**: "Required" badge, "Connect" button → `/api/stripe/connect/start`. Shows "● Connected" badge + "Reconnect →" link when connected.
 - **Slack row**: "Authorize" button (black, replaces old Slack purple). Uses `SlackConnectCard` for connected state.
 - **Discord row**: "Authorize" button (black, replaces old Discord blurple). Uses `DiscordConnectCard` for connected state.
 - **Webhooks row**: "Connect" / "Manage" button toggles inline form. Handled entirely by `WebhooksSection` client component.
-- **"Not seeing an integration you need?" banner** at top — mailto link for integration requests.
+- **"Not seeing an integration you need?" banner** at top  mailto link for integration requests.
 - **Notification summary** at bottom: 3 cards with HugeIcons (`CheckmarkCircle01Icon` green, `AlertDiamondIcon` amber, `NotificationOff01Icon` gray) explaining what events fire to Slack/Discord.
 - **Sidebar nav**: "Connections" link (`Plug01Icon`) added to main nav.
 - **Settings page**: Stripe/Slack/Discord cards removed from sidebar; replaced with compact "Connections" status card showing ● Connected / ○ Not connected per integration + "Manage connections →" link.
-- **Connect buttons unified**: All three integrations (Stripe, Slack, Discord) now use the same black `#18181b` "Connect" / "Authorize" button style — no more colored brand buttons.
+- **Connect buttons unified**: All three integrations (Stripe, Slack, Discord) now use the same black `#18181b` "Connect" / "Authorize" button style  no more colored brand buttons.
 
 ### Discord OAuth integration (April 5, 2026)
 - **`discordWebhookUrl String?`** and **`discordChannelName String?`** on `Tenant` model (`discord_webhook_url`, `discord_channel_name` columns). Run `npx prisma db push` to sync.
-- **`apps/web/src/lib/discord.ts`** — two exported helpers using Discord embeds:
-  - `sendDiscordSaveAlert` — fires when a subscriber clicks "Keep my subscription". Embed color: green `0x22c55e`. Includes customer, offer type, MRR saved, timestamp.
-  - `sendDiscordHighRiskAlert` — fires per high-risk subscriber from churn prediction. Embed color: amber `0xF59E0B`. Includes customer, risk score %, cancel attempts, failed payments, days inactive.
-- **OAuth flow** (`webhook.incoming` scope — no bot token needed):
-  - `GET /api/discord/connect` — redirects merchant to Discord OAuth. Uses `signConnectState` (same HMAC state as Stripe/Slack).
-  - `GET /api/discord/callback` — exchanges code via `https://discord.com/api/oauth2/token`, saves `webhook.url` + `webhook.name` (channel name) to tenant.
-  - `POST /api/discord/disconnect` — clears `discordWebhookUrl` + `discordChannelName`.
-- **Settings UI** (`discord-connect-card.tsx`) — "Connect Discord" button (Discord blurple `#5865F2`, Discord logo SVG). After OAuth: shows green "Connected" pill + `#channel-name` + "Disconnect Discord" button.
-- **`cancel-outcome` route** — fires both Slack and Discord save alerts in parallel (non-blocking) when respective webhook URLs are set.
-- **`churn_prediction.py`** — `_get_tenant_notification_urls` now fetches `slack_webhook_url`, `discord_webhook_url`, and `name` in one query. Fires `_send_slack_high_risk` and `_send_discord_high_risk` per high-risk subscriber. Both use shared `_post_webhook` helper (stdlib `urllib.request`, no new deps).
-- **Env vars required**: `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_REDIRECT_URI` (must be HTTPS — use ngrok in dev). Add redirect URI in Discord Developer Portal → OAuth2 → Redirects.
-- **Tenant onboarding note**: Tenants must **create a Discord channel first** (recommended: `churnshield-alerts`) in their server before clicking "Connect Discord". During the OAuth screen Discord asks which server + channel to post to — they select that channel. ChurnShield cannot create channels automatically (requires `MANAGE_CHANNELS` bot permission — not implemented, not worth it at MVP).
+- **`apps/web/src/lib/discord.ts`**  two exported helpers using Discord embeds:
+  - `sendDiscordSaveAlert`  fires when a subscriber clicks "Keep my subscription". Embed color: green `0x22c55e`. Includes customer, offer type, MRR saved, timestamp.
+  - `sendDiscordHighRiskAlert`  fires per high-risk subscriber from churn prediction. Embed color: amber `0xF59E0B`. Includes customer, risk score %, cancel attempts, failed payments, days inactive.
+- **OAuth flow** (`webhook.incoming` scope  no bot token needed):
+  - `GET /api/discord/connect`  redirects merchant to Discord OAuth. Uses `signConnectState` (same HMAC state as Stripe/Slack).
+  - `GET /api/discord/callback`  exchanges code via `https://discord.com/api/oauth2/token`, saves `webhook.url` + `webhook.name` (channel name) to tenant.
+  - `POST /api/discord/disconnect`  clears `discordWebhookUrl` + `discordChannelName`.
+- **Settings UI** (`discord-connect-card.tsx`)  "Connect Discord" button (Discord blurple `#5865F2`, Discord logo SVG). After OAuth: shows green "Connected" pill + `#channel-name` + "Disconnect Discord" button.
+- **`cancel-outcome` route**  fires both Slack and Discord save alerts in parallel (non-blocking) when respective webhook URLs are set.
+- **`churn_prediction.py`**  `_get_tenant_notification_urls` now fetches `slack_webhook_url`, `discord_webhook_url`, and `name` in one query. Fires `_send_slack_high_risk` and `_send_discord_high_risk` per high-risk subscriber. Both use shared `_post_webhook` helper (stdlib `urllib.request`, no new deps).
+- **Env vars required**: `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_REDIRECT_URI` (must be HTTPS  use ngrok in dev). Add redirect URI in Discord Developer Portal → OAuth2 → Redirects.
+- **Tenant onboarding note**: Tenants must **create a Discord channel first** (recommended: `churnshield-alerts`) in their server before clicking "Connect Discord". During the OAuth screen Discord asks which server + channel to post to  they select that channel. ChurnShield cannot create channels automatically (requires `MANAGE_CHANNELS` bot permission  not implemented, not worth it at MVP).
 - **Alerts sent to Discord**: save confirmed + high-risk subscriber only. Feedback digests go to email only (Resend).
-- **Tested and working** ✅ — embed alerts confirmed firing in Discord channel.
+- **Tested and working** ✅  embed alerts confirmed firing in Discord channel.
 
 ### Slack OAuth integration (April 5, 2026)
 - **`slackWebhookUrl String?`** and **`slackChannelName String?`** on `Tenant` model (`slack_webhook_url`, `slack_channel_name` columns). Run `npx prisma db push` to sync.
-- **`apps/web/src/lib/slack.ts`** — two exported helpers using Block Kit:
-  - `sendSlackSaveAlert` — fires when a subscriber clicks "Keep my subscription" (save confirmed). Includes customer, offer type, MRR saved.
-  - `sendSlackHighRiskAlert` — fires per high-risk subscriber from the churn prediction job. Includes customer, risk score %, cancel attempts, failed payments, days inactive.
-- **`cancel-outcome` route** — calls `sendSlackSaveAlert` non-blocking after a successful save if `tenant.slackWebhookUrl` is set.
-- **`churn_prediction.py`** — fetches `slack_webhook_url` from DB once per run, calls `_send_slack_high_risk` per high-risk subscriber via `asyncio.to_thread`.
+- **`apps/web/src/lib/slack.ts`**  two exported helpers using Block Kit:
+  - `sendSlackSaveAlert`  fires when a subscriber clicks "Keep my subscription" (save confirmed). Includes customer, offer type, MRR saved.
+  - `sendSlackHighRiskAlert`  fires per high-risk subscriber from the churn prediction job. Includes customer, risk score %, cancel attempts, failed payments, days inactive.
+- **`cancel-outcome` route**  calls `sendSlackSaveAlert` non-blocking after a successful save if `tenant.slackWebhookUrl` is set.
+- **`churn_prediction.py`**  fetches `slack_webhook_url` from DB once per run, calls `_send_slack_high_risk` per high-risk subscriber via `asyncio.to_thread`.
 - **OAuth flow** (replaces old manual webhook paste):
-  - `GET /api/slack/connect` — redirects merchant to Slack OAuth (scope: `incoming-webhook`). Uses `signConnectState` (same HMAC state as Stripe Connect).
-  - `GET /api/slack/callback` — exchanges code via `https://slack.com/api/oauth.v2.access`, saves `incoming_webhook.url` + `incoming_webhook.channel` to tenant.
-  - `POST /api/slack/disconnect` — clears `slackWebhookUrl` + `slackChannelName`.
-- **Settings UI** (`slack-connect-card.tsx`) — "Add to Slack" button (Slack purple, Slack logo icon). After OAuth: shows green "Connected" pill + channel name (e.g. `#churnshield-alerts`) + "Disconnect Slack" button.
-- **Env vars required**: `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_REDIRECT_URI` (must be HTTPS — use ngrok in dev).
-- **Tenant onboarding note**: Tenants must **create a Slack channel first** (recommended: `#churnshield-alerts`) before clicking "Add to Slack", then select that channel in the Slack permission screen. ChurnShield cannot create channels automatically (would require `channels:manage` bot scope — not implemented, not worth it at MVP).
+  - `GET /api/slack/connect`  redirects merchant to Slack OAuth (scope: `incoming-webhook`). Uses `signConnectState` (same HMAC state as Stripe Connect).
+  - `GET /api/slack/callback`  exchanges code via `https://slack.com/api/oauth.v2.access`, saves `incoming_webhook.url` + `incoming_webhook.channel` to tenant.
+  - `POST /api/slack/disconnect`  clears `slackWebhookUrl` + `slackChannelName`.
+- **Settings UI** (`slack-connect-card.tsx`)  "Add to Slack" button (Slack purple, Slack logo icon). After OAuth: shows green "Connected" pill + channel name (e.g. `#churnshield-alerts`) + "Disconnect Slack" button.
+- **Env vars required**: `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_REDIRECT_URI` (must be HTTPS  use ngrok in dev).
+- **Tenant onboarding note**: Tenants must **create a Slack channel first** (recommended: `#churnshield-alerts`) before clicking "Add to Slack", then select that channel in the Slack permission screen. ChurnShield cannot create channels automatically (would require `channels:manage` bot scope  not implemented, not worth it at MVP).
 - **Alerts sent to Slack**: save confirmed + high-risk subscriber only. Feedback digests go to email only (Resend).
-- **Hydration fix** — `subscribers-table.tsx` `lastScored` column was using `new Date(v).toLocaleDateString()` which produces different output on Node.js (server) vs browser (client locale). Fixed to `v.slice(0, 10)` → stable `YYYY-MM-DD`.
+- **Hydration fix**  `subscribers-table.tsx` `lastScored` column was using `new Date(v).toLocaleDateString()` which produces different output on Node.js (server) vs browser (client locale). Fixed to `v.slice(0, 10)` → stable `YYYY-MM-DD`.
 
 ### Landing page refactor (April 5, 2026)
-- **All Lucide icons removed** from `apps/web/src/app/page.tsx`. Every icon now uses `@hugeicons/react` (`HugeiconsIcon` component + icon data objects from `@hugeicons/core-free-icons`). Pattern: `<HugeiconsIcon icon={IconDataObject} size={n} />`. **Important:** many icon names differ from Lucide equivalents — always verify against the installed package with `node --input-type=module` before using a new icon name.
+- **All Lucide icons removed** from `apps/web/src/app/page.tsx`. Every icon now uses `@hugeicons/react` (`HugeiconsIcon` component + icon data objects from `@hugeicons/core-free-icons`). Pattern: `<HugeiconsIcon icon={IconDataObject} size={n} />`. **Important:** many icon names differ from Lucide equivalents  always verify against the installed package with `node --input-type=module` before using a new icon name.
 - **Spinning triangle nav logo** added to landing page nav (left of "ChurnShield" wordmark). Uses inline SVG `<polygon>` with `strokeDasharray` + CSS `@keyframes cs-nav-logo-tri` animation. Class `cs-nav-logo-tri` (distinct from dashboard sidebar's `cs-logo-tri`).
 - **"How it works" section** replaced with `HowItWorks` component (`apps/web/src/components/blocks/how-it-works.tsx`). Blog7-style 3-column card grid (shadcn `Card` + `Badge`). Uses HugeIcons: `SourceCodeIcon`, `BubbleChatSparkIcon`, `Analytics01Icon`, `CheckmarkCircle01Icon`. White background, `lnd-shell` container. The old `ContainerScroll` / `CardSticky` sticky-scroll section is gone.
 - **`ProductPillarSection` function removed** entirely from `page.tsx` (was dead code after the sticky-scroll removal).
-- **Logo strips removed** — both the top strip (after metrics) and bottom strip (before footer CTA) are gone.
-- **Footer CTA dark section removed** — was a standalone dark "start saving" block before the footer; no longer needed.
+- **Logo strips removed**  both the top strip (after metrics) and bottom strip (before footer CTA) are gone.
+- **Footer CTA dark section removed**  was a standalone dark "start saving" block before the footer; no longer needed.
 - **Footer replaced** with `ModemAnimatedFooter` (`apps/web/src/components/ui/modem-animated-footer.tsx`). Large ghost "CHURNSHIELD" background text, spinning triangle brand icon (white on black box, class `cs-footer-logo-tri`), white background. Social links: **mail only** (`Mail01Icon` → `mailto:hello@churnshield.ai`). Twitter/GitHub removed.
 - **ChatCard** (hero section mock): user bubble `#3f3f46` bg, AI bubble white with `#e4e4e7` border, "Keep my subscription" button `#d1fae5` bg / `#059669` text / `#a7f3d0` border.
 - **Nav mobile toggle** icons: open = `Menu01Icon`, close = `Cancel01Icon`.
@@ -112,15 +112,15 @@
 - **Layout fix** for SaveButton in settings: added `minWidth: 0` to the `<input>` (flex items need this to shrink) and `flexShrink: 0` wrapper around the button so it doesn't overflow the card.
 - **Integration page copy button** (`apps/web/src/app/dashboard/integration/copy-button.tsx`) rewritten to use `TooltipProvider` + `Tooltip` + `TooltipTrigger` + `TooltipContent` (shadcn) + HugeIcons (`Copy01Icon`, `CheckmarkCircle01Icon`). Two variants: `"overlay"` (absolute-positioned over dark code block) and `"inline"` (sits next to code value). Animated icon transition on copy success.
 
-### Cancel chat widget (`cs.js`) — April 5, 2026
+### Cancel chat widget (`cs.js`)  April 5, 2026
 - **Header redesign**: white background (`#ffffff`), dark text, removed avatar element, title changed to `"Aria · Retention Assistant"`, subtitle `"ChurnShield · Active"`. Close button: gray bg `#f4f4f5`, gray `×`. Bottom border `1px solid #f0f0f0`.
 - **AI avatar**: light gray circle `#f4f4f5` with border + sparkle/star SVG icon (inline SVG, no external deps). No ChurnShield logo in chat.
 - **User bubbles**: solid black (`#09090b`), no gradient. AI bubbles: white with light border.
 - **Dynamic offer button**: After each AI message stream completes, `cs.js` calls `GET /api/public/cancel-chat/offer?sessionId=&key=` (new endpoint, see below). If an offer is present, `buildOfferLabel(offer)` generates a human-readable label (e.g. "Claim 10% off · Stay subscribed") and updates the `.cs-keep` button innerHTML so the user sees the actual offer, not just "Keep my subscription".
-- **`buildOfferLabel(offer)`** function in `cs.js`: switches on `offer.type` — `discount` → "Claim {pct}% off · Stay subscribed", `pause` → "Pause my subscription", `extension` → "Claim {months}-month free extension", `downgrade` → "Switch to a lower plan", default → "Keep my subscription".
+- **`buildOfferLabel(offer)`** function in `cs.js`: switches on `offer.type`  `discount` → "Claim {pct}% off · Stay subscribed", `pause` → "Pause my subscription", `extension` → "Claim {months}-month free extension", `downgrade` → "Switch to a lower plan", default → "Keep my subscription".
 - **Clean chat input**: Changed from `<textarea>` to `<input type="text">` with `-webkit-appearance:none; appearance:none; box-shadow:none` to suppress browser default border/box-shadow. `.cs-input:focus` CSS: `border:none; box-shadow:none`. No attachment button.
 - **Send button**: 30×30px, `border-radius:8px` (rounded square, not circle), arrow-up SVG icon.
-- **"Before you go" heading removed** — replaced with the agent name in the header.
+- **"Before you go" heading removed**  replaced with the agent name in the header.
 
 ### New API endpoint: pending offer (April 5, 2026)
 - **`GET /api/public/cancel-chat/offer`** (`apps/web/src/app/api/public/cancel-chat/offer/route.ts`). Params: `sessionId`, `key` (snippetKey). Validates that the session belongs to the tenant with that `snippetKey`. Returns `{ offer: PendingOffer | null }`. CORS `*`. Used by `cs.js` after each AI turn to show the structured offer on the "Keep my subscription" button.
@@ -286,7 +286,7 @@ chrun/
 |-------|------------|
 | `tenants` | id, name, clerkUserId, clerkOrgId, snippetKey, stripeConnectId, ownerEmail, **offer_settings** (JSON: maxDiscountPct, allowPause, allowFreeExtension, allowPlanDowngrade, customMessage) |
 | `stripe_events` | id, tenantId, stripeEventId, type, payload, processed, livemode |
-| `save_sessions` | sessionId, tenantId, triggerType, subscriberId, subscriptionMrr, offerMade, **offerType** (pause\|extension\|discount\|downgrade\|empathy), offerAccepted, outcomeConfirmedAt, savedValue, feeCharged, feeBilledAt, stripeChargeId, transcript, **pendingOffer** (JSON — structured offer from `makeOffer` tool, written in `onFinish`; migration `20260404120000_pending_offer`) |
+| `save_sessions` | sessionId, tenantId, triggerType, subscriberId, subscriptionMrr, offerMade, **offerType** (pause\|extension\|discount\|downgrade\|empathy), offerAccepted, outcomeConfirmedAt, savedValue, feeCharged, feeBilledAt, stripeChargeId, transcript, **pendingOffer** (JSON  structured offer from `makeOffer` tool, written in `onFinish`; migration `20260404120000_pending_offer`) |
 | `churn_predictions` | id, tenantId, subscriberId, riskScore, riskClass, features, predictedAt |
 | `feedback_digests` | id, tenantId, periodDays, transcriptCount, clusters, digestText |
 | `payment_retries` | id, tenantId, stripeEventId, invoiceId, customerId, customerEmail, failureClass, delayHours, attempts, maxAttempts, nextRetryAt, status, lastError |
@@ -499,7 +499,7 @@ chrun/
 | **Structured tools in cancel-chat** (`makeOffer`, apply Stripe paths) | Fewer mismatches vs `detectOffer` heuristics | High impact on reliability | **Done**  `makeOfferTool` in `cancel-agent.ts`; `pending_offer` JSON column on `save_sessions`; `resolveBillingOfferFromSession` prefers DB over client body; `detectOffer` heuristic retired from `cs.js`; cancelled outcomes with `pending_offer` record offered-but-rejected type. Remaining gap: no guarantee model always calls the tool (no AI eval enforcement yet) |
 
 | **Webhooks or Zapier** (“save created”, high-risk, digest) | Mid-market expects integrations | Email-heavy today; webhooks complement | **Not done** |
-| **Slack alerts** (saves, high-risk) | Low friction for founders | Small surface, high perceived value | **Done** — incoming webhook URL saved on tenant (`slack_webhook_url`); save alert fires from `cancel-outcome`; high-risk alert fires from `churn_prediction.py`; Settings UI card with validation. Discord: **Not done** |
+| **Slack alerts** (saves, high-risk) | Low friction for founders | Small surface, high perceived value | **Done**  incoming webhook URL saved on tenant (`slack_webhook_url`); save alert fires from `cancel-outcome`; high-risk alert fires from `churn_prediction.py`; Settings UI card with validation. Discord: **Not done** |
 | **CSV export** (sessions, subscribers) | Trust + ops; category norm | Easy win on existing tables | **Done**  Sessions: client-side export of filtered rows in `sessions-table.tsx`; Subscribers: `/api/dashboard/export/subscribers` GET route + `ExportSubscribersButton` component on subscribers page |
 | **Configurable digest window + daily digest / weekly email** | Fresher analyst without inbox spam | Scheduling + `send_email` flag + retention policy | **Not done** |
 | **Skip digest when no new transcripts** | Cost control at scale | Agents + DB watermark or hash | **Done**  `_check_watermark` node in `feedback_analyser.py`; queries last digest `created_at`, counts new transcripts since then; skips entire LangGraph pipeline with `reason: no_new_transcripts_since_last_digest` |

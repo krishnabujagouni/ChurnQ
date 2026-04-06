@@ -5,7 +5,7 @@ description: "Send ChurnShield events to 7,000+ apps via Zapier Webhooks."
 
 ## Overview
 
-Zapier does not offer a native ChurnShield app, but you can connect ChurnShield to any Zapier workflow using **Webhooks by Zapier** — a built-in Zapier trigger that gives you a unique URL. Paste that URL into ChurnShield and events flow automatically.
+Zapier does not offer a native ChurnShield app, but you can connect ChurnShield to any Zapier workflow using **Webhooks by Zapier**  a built-in Zapier trigger that gives you a unique URL. Paste that URL into ChurnShield and events flow automatically.
 
 <Info>
   Each Zapier Zap gets its own webhook URL. If you want to send events to multiple Zaps, add each URL as a separate webhook endpoint inside ChurnShield.
@@ -25,7 +25,7 @@ Zapier does not offer a native ChurnShield app, but you can connect ChurnShield 
 
     Choose **Catch Hook** as the trigger event, then click **Continue**.
 
-    Zapier will generate a unique webhook URL — copy it.
+    Zapier will generate a unique webhook URL  copy it.
   </Step>
 
   <Step title="Paste the URL into ChurnShield">
@@ -39,11 +39,11 @@ Zapier does not offer a native ChurnShield app, but you can connect ChurnShield 
   <Step title="Test the connection">
     Click the **Test** button (play icon) next to the Zapier endpoint.
 
-    ChurnShield sends a `webhook.test` event. Switch back to Zapier and click **Test trigger** — you should see the payload arrive.
+    ChurnShield sends a `webhook.test` event. Switch back to Zapier and click **Test trigger**  you should see the payload arrive.
   </Step>
 
   <Step title="Build your Zap action">
-    With the test data loaded, add an **Action** step in Zapier — for example:
+    With the test data loaded, add an **Action** step in Zapier  for example:
     - Send a Slack message
     - Add a row to Google Sheets
     - Create a HubSpot contact
@@ -90,7 +90,7 @@ All requests include two headers:
 | Header | Value |
 |--------|-------|
 | `X-ChurnShield-Event` | Event name, e.g. `cancel_intent.created` |
-| `X-ChurnShield-Signature` | `sha256=<hmac-hex>` — used to verify authenticity |
+| `X-ChurnShield-Signature` | `sha256=<hmac-hex>`  used to verify authenticity |
 
 See [HMAC Signing](/configuration/hmac-signing) for verification details.
 
@@ -131,6 +131,6 @@ See [HMAC Signing](/configuration/hmac-signing) for verification details.
   </Accordion>
 
   <Accordion title="Can I connect more than one Zap?">
-    Yes. Each Zap has its own webhook URL. Add each URL as a separate endpoint in ChurnShield — there is no limit on the number of Zapier endpoints you can add.
+    Yes. Each Zap has its own webhook URL. Add each URL as a separate endpoint in ChurnShield  there is no limit on the number of Zapier endpoints you can add.
   </Accordion>
 </AccordionGroup>

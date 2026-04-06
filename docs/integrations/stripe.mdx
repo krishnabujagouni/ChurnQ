@@ -29,7 +29,7 @@ Without Stripe Connect:
 </Steps>
 
 <Check>
-  Once connected, test by going through a cancel flow and accepting an offer. Check your Stripe dashboard — the coupon or pause should appear on the subscription within seconds.
+  Once connected, test by going through a cancel flow and accepting an offer. Check your Stripe dashboard  the coupon or pause should appear on the subscription within seconds.
 </Check>
 
 ---
@@ -40,7 +40,7 @@ Without Stripe Connect:
 - Creates a reusable coupon: `churnshield_ret_{pct}p_{months}m` (e.g. `churnshield_ret_25p_3m`)
 - Applies it to the subscriber's active subscription
 - Duration: **repeating for 3 months**, then the subscription returns to full price
-- ChurnShield coupons never stack — a new save replaces the previous retention coupon
+- ChurnShield coupons never stack  a new save replaces the previous retention coupon
 
 ### Pause offers
 - Sets `pause_collection: { behavior: "mark_uncollectible" }` on the subscription
@@ -59,7 +59,7 @@ ChurnShield charges 15% of the MRR retained, per successful save. The fee is:
 - **Immediate** for pause and empathy offers (confirmed right away)
 - **Deferred** for discount and extension offers (confirmed after `invoice.paid` fires from Stripe)
 
-Fees are charged automatically to your Stripe account via Connect — no manual invoices.
+Fees are charged automatically to your Stripe account via Connect  no manual invoices.
 
 ---
 

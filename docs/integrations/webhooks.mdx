@@ -5,7 +5,7 @@ description: Receive real-time HTTP POST events from ChurnShield to any URL.
 
 ## Overview
 
-Webhooks let ChurnShield send events to your own server, internal tools, or automation platforms the moment something happens — a subscriber is saved, or a subscriber is flagged as high-risk.
+Webhooks let ChurnShield send events to your own server, internal tools, or automation platforms the moment something happens  a subscriber is saved, or a subscriber is flagged as high-risk.
 
 Every request is signed with HMAC-SHA256 so you can verify it genuinely came from ChurnShield.
 
@@ -30,13 +30,13 @@ Every request is signed with HMAC-SHA256 so you can verify it genuinely came fro
     Paste the URL of your server endpoint. Must be `https://`.
   </Step>
   <Step title="Select events">
-    Choose which events to receive — `Subscriber retained`, `High-risk detected`, or both.
+    Choose which events to receive  `Subscriber retained`, `High-risk detected`, or both.
   </Step>
   <Step title="Click Add endpoint">
     ChurnShield creates the endpoint and generates a signing secret (`whsec_...`).
   </Step>
   <Step title="Save your signing secret">
-    Copy the signing secret — use it to verify incoming requests. It's shown once but you can reveal it anytime from the endpoint row.
+    Copy the signing secret  use it to verify incoming requests. It's shown once but you can reveal it anytime from the endpoint row.
   </Step>
 </Steps>
 
@@ -141,7 +141,7 @@ def verify_signature(secret: str, raw_body: bytes, signature_header: str) -> boo
 If your endpoint returns a non-2xx response or times out, ChurnShield retries up to **3 times** with backoff (1.5s, 3s). After 3 failures the delivery is marked as failed and logged.
 
 - Timeout per attempt: **5 seconds**
-- Redirects: **not followed** — use the direct URL
+- Redirects: **not followed**  use the direct URL
 - Max endpoints per account: **10**
 
 ---
@@ -165,7 +165,7 @@ Click the **play button** on any endpoint row to send a `webhook.test` event:
 
 ## Delivery logs
 
-Click the **eye icon** on any endpoint row to open the delivery log drawer. You can see every attempt — status, HTTP response code, response body preview, and duration. Failed deliveries can be resent individually.
+Click the **eye icon** on any endpoint row to open the delivery log drawer. You can see every attempt  status, HTTP response code, response body preview, and duration. Failed deliveries can be resent individually.
 
 ---
 

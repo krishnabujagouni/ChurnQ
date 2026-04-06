@@ -45,7 +45,7 @@ Go to [ChurnShield → Settings → Offers](https://app.churnshield.ai/dashboard
   <Step title="Set the headline and body copy">
     Customise the text shown on the offer page. Use `{{discount}}` as a placeholder for the amount:
 
-    > "Before you go — how about **{{discount}} off** your next 3 months?"
+    > "Before you go  how about **{{discount}} off** your next 3 months?"
   </Step>
 </Steps>
 
@@ -65,7 +65,7 @@ Pausing a subscription stops billing temporarily without cancelling. The subscri
   </Step>
 
   <Step title="Choose pause duration options">
-    Select which durations subscribers can choose from: **1 month**, **2 months**, or **3 months**. You can enable multiple options — ChurnShield will present them as a choice.
+    Select which durations subscribers can choose from: **1 month**, **2 months**, or **3 months**. You can enable multiple options  ChurnShield will present them as a choice.
   </Step>
 
   <Step title="Customise copy">
@@ -93,7 +93,7 @@ Downgrading switches the subscriber to a lower-tier plan you specify.
   </Step>
 
   <Step title="Customise copy">
-    Example: "Our **Starter plan** at $9/month might be a better fit — interested?"
+    Example: "Our **Starter plan** at $9/month might be a better fit  interested?"
   </Step>
 </Steps>
 
@@ -101,7 +101,7 @@ Downgrading switches the subscriber to a lower-tier plan you specify.
 
 ## AI personalisation
 
-ChurnShield's AI uses the subscriber's cancellation reason, MRR, and subscription age to select the most appropriate offer type. You do not need to configure this — it is automatic.
+ChurnShield's AI uses the subscriber's cancellation reason, MRR, and subscription age to select the most appropriate offer type. You do not need to configure this  it is automatic.
 
 | Cancellation reason | Most likely offer |
 |--------------------|-------------------|
@@ -146,6 +146,6 @@ Use a Stripe test-mode subscription to exercise the full offer flow without real
 
 1. Create a test customer and subscription in the [Stripe test dashboard](https://dashboard.stripe.com/test/subscriptions).
 2. Call `/api/cancel-intent` with the test subscription ID.
-3. The offer page will appear — accepting it applies a real test coupon or pause in Stripe test mode.
+3. The offer page will appear  accepting it applies a real test coupon or pause in Stripe test mode.
 
 All test events are clearly marked `livemode: false` in Stripe and do not affect your live data.

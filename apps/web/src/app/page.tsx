@@ -212,7 +212,7 @@ export default function LandingPage() {
               <polygon points="14,2 26,24 2,24" fill="none" stroke="#e4e4e7" strokeWidth="2.5" strokeLinejoin="round" />
               <polygon points="14,2 26,24 2,24" fill="none" stroke="#09090b" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="24 60" strokeDashoffset="0" />
             </svg>
-            <span style={{ color: "var(--cs-accent)" }}>Churn</span>Shield
+            <span style={{ color: "var(--cs-accent)" }}>ChurnShield</span>
           </Link>
           <div className="lnd-desktop items-center" style={{ gap: 0 }}>
             <div style={{ "--primary": "240 6% 10%", "--muted-foreground": "240 4% 46%" } as React.CSSProperties}>
@@ -493,7 +493,7 @@ export default function LandingPage() {
                 ],
               },
             ]}
-            buttonText="Get started — free"
+            buttonText="Get started  free"
             onButtonClick={() => router.push("/sign-up")}
           />
 

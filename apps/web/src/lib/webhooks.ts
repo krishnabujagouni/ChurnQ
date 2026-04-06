@@ -76,8 +76,8 @@ export async function postWebhookSigned(
       if (res.status >= 300 && res.status < 400) {
         const loc = res.headers.get("location");
         lastErr = loc
-          ? `HTTP ${res.status} redirect to ${loc.slice(0, 200)} — redirects are not followed; paste the final webhook URL`
-          : `HTTP ${res.status} redirect — use the direct URL with no redirects`;
+          ? `HTTP ${res.status} redirect to ${loc.slice(0, 200)}  redirects are not followed; paste the final webhook URL`
+          : `HTTP ${res.status} redirect  use the direct URL with no redirects`;
       } else if (res.ok) {
         return {
           ok: true,
@@ -90,7 +90,7 @@ export async function postWebhookSigned(
         };
       } else if (res.status === 404) {
         lastErr =
-          "HTTP 404 — no POST handler at this path (wrong token in the URL, typo, or expired webhook URL)";
+          "HTTP 404  no POST handler at this path (wrong token in the URL, typo, or expired webhook URL)";
       } else {
         lastErr = `HTTP ${res.status}`;
       }
@@ -163,7 +163,7 @@ async function deliverAndLog(input: {
   });
 }
 
-/** Fire an event to all enabled webhook endpoints for this tenant. Non-blocking — never throws. */
+/** Fire an event to all enabled webhook endpoints for this tenant. Non-blocking  never throws. */
 export function fireWebhooks(tenantId: string, event: WebhookEvent, data: object): void {
   prisma.webhookEndpoint
     .findMany({ where: { tenantId, enabled: true, events: { has: event } } })
@@ -226,7 +226,7 @@ export async function resendWebhookDelivery(input: {
   return result;
 }
 
-/** Dashboard "Send test" — `webhook.test` event, logged with `isTest: true`. */
+/** Dashboard "Send test"  `webhook.test` event, logged with `isTest: true`. */
 export async function runWebhookTest(endpoint: {
   id: string;
   tenantId: string;
