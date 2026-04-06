@@ -1,13 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  NewTwitterIcon,
-  Linkedin01Icon,
-  Github01Icon,
-  Mail01Icon,
-} from "@hugeicons/core-free-icons";
+
 import { cn } from "@/lib/utils";
 
 interface FooterLink {
@@ -111,7 +105,7 @@ export const ModemAnimatedFooter = ({
 
         {/* Bottom logo mark */}
         <div className="absolute hover:border-[#09090b] duration-300 drop-shadow-[0_0px_20px_rgba(0,0,0,0.12)] bottom-24 md:bottom-20 backdrop-blur-sm rounded-3xl bg-white/80 left-1/2 border-2 border-[#e4e4e7] flex items-center justify-center p-3 -translate-x-1/2 z-10">
-          <div className="w-12 sm:w-16 md:w-24 h-12 sm:h-16 md:h-24 bg-[#09090b] rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="w-12 sm:w-16 md:w-24 h-12 sm:h-16 md:h-24 bg-white rounded-2xl flex items-center justify-center shadow-lg">
             {brandIcon}
           </div>
         </div>

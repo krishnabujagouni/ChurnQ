@@ -644,9 +644,9 @@ export default function LandingPage() {
         ]}
         brandIcon={
           <svg width="48" height="48" viewBox="0 0 512 512" fill="none" aria-hidden>
-            <line x1="68" y1="400" x2="256" y2="88" stroke="rgba(255,255,255,0.3)" strokeWidth="28" strokeLinecap="round"/>
-            <line x1="68" y1="400" x2="444" y2="400" stroke="rgba(255,255,255,0.3)" strokeWidth="28" strokeLinecap="round"/>
-            <line x1="256" y1="88" x2="444" y2="400" stroke="#ffffff" strokeWidth="28" strokeLinecap="round"/>
+            <line x1="68" y1="400" x2="256" y2="88" stroke="#d4d4d8" strokeWidth="28" strokeLinecap="round"/>
+            <line x1="68" y1="400" x2="444" y2="400" stroke="#d4d4d8" strokeWidth="28" strokeLinecap="round"/>
+            <line x1="256" y1="88" x2="444" y2="400" stroke="#18181b" strokeWidth="28" strokeLinecap="round"/>
           </svg>
         }
       />
