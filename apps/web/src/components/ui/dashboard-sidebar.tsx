@@ -56,7 +56,7 @@ function NavOption({ item, selected, open }: { item: NavItem; selected: boolean;
   const baseStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
-    height: 44,
+    height: 38,
     width: "100%",
     borderRadius: 8,
     border: "none",
@@ -85,8 +85,8 @@ function NavOption({ item, selected, open }: { item: NavItem; selected: boolean;
       onMouseLeave={e => { if (!selected) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
     >
       <div style={{
-        width: 44,
-        height: 44,
+        width: 38,
+        height: 38,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -95,7 +95,7 @@ function NavOption({ item, selected, open }: { item: NavItem; selected: boolean;
         <HugeiconsIcon icon={item.icon} size={20} strokeWidth={1.5} />
       </div>
       {open && (
-        <span style={{ fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: 12, fontWeight: 500, whiteSpace: "nowrap" }}>
           {item.title}
         </span>
       )}
@@ -228,29 +228,28 @@ export function DashboardSidebar() {
 
         {/* Info card  dismissible tip, only shown when sidebar is expanded */}
         {open && (
-          <div style={{ padding: "0 4px 8px" }}>
+          <div style={{ padding: "0 4px 6px" }}>
             <InfoCard
               storageKey="sidebar-integration-tip"
               dismissType="forever"
               className="border-[var(--cs-border,#e4e4e7)] bg-[var(--cs-bg,#fafafa)] text-[var(--cs-text,#18181b)]"
             >
-              <InfoCardContent className="text-xs">
-                <InfoCardTitle className="text-xs font-semibold text-[var(--cs-text,#18181b)]">
-                  Connect your billing
-                </InfoCardTitle>
-                <InfoCardDescription className="text-[var(--cs-text-muted,#71717a)]">
-                  Link Stripe or Paddle to start saving subscribers automatically.
-                </InfoCardDescription>
-                <InfoCardFooter className="mt-1 text-[var(--cs-text-muted,#71717a)]">
-                  <InfoCardDismiss className="hover:text-[var(--cs-text,#18181b)] transition-colors">
-                    Dismiss
+              <InfoCardContent style={{ padding: "8px 10px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+                  <InfoCardTitle style={{ fontSize: 11, fontWeight: 600, color: "var(--cs-text,#18181b)", margin: 0 }}>
+                    Connect billing
+                  </InfoCardTitle>
+                  <InfoCardDismiss style={{ fontSize: 10, color: "var(--cs-text-muted,#71717a)", cursor: "pointer", background: "none", border: "none", padding: 0 }}>
+                    ✕
                   </InfoCardDismiss>
+                </div>
+                <InfoCardFooter style={{ marginTop: 4, display: "flex", justifyContent: "flex-end" }}>
                   <InfoCardAction>
                     <Link
-                      href="/dashboard/integration"
-                      className="flex items-center gap-1 underline hover:text-[var(--cs-accent,#18181b)] transition-colors"
+                      href="/dashboard/connections"
+                      style={{ fontSize: 11, color: "var(--cs-accent,#18181b)", textDecoration: "underline", display: "flex", alignItems: "center", gap: 3 }}
                     >
-                      Set up <ExternalLink size={10} />
+                      Set up <ExternalLink size={9} />
                     </Link>
                   </InfoCardAction>
                 </InfoCardFooter>
