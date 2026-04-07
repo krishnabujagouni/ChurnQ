@@ -6,5 +6,7 @@ dockerfilePath = "Dockerfile"
 startCommand = "uvicorn churnshield_agents.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 3
+
+[deploy.restartPolicy]
+type = "on_failure"
+maxRetries = 3
