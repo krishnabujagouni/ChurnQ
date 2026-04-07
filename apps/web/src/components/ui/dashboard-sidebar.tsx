@@ -220,7 +220,7 @@ export function DashboardSidebar() {
       {/* Scrollable middle: main nav + info card + bottom nav */}
       <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column", paddingBottom: 48 }}>
         {/* Main nav */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {mainNav.map(item => (
             <NavOption key={item.href + item.title} item={item} selected={isSelected(item.href)} open={open} />
           ))}
