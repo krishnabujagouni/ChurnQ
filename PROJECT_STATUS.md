@@ -1,11 +1,51 @@
 # ChurnShield  Project Status
-*Last updated: April 6, 2026 (Stripe Connect + retention offer fixes)*
+*Last updated: April 7, 2026 (Production deployment — Vercel + Railway)*
 
 ---
 
 ## For future sessions  what changed recently
 
 **Read this block first** when picking up the repo; it summarizes implementation not obvious from file names alone.
+
+### Production Deployment (April 7, 2026)
+
+#### URLs
+- **Web (Vercel)**: `https://chrunsheild.vercel.app`
+- **Agents (Railway)**: `https://chrunsheild-production.up.railway.app`
+- **Health check**: `https://chrunsheild-production.up.railway.app/health`
+
+#### Vercel (Next.js web app)
+- Root directory: `apps/web`
+- All env vars set in Vercel dashboard (Production + Preview + Development)
+- `DATABASE_URL` uses Supabase **transaction pooler** URL (port 6543, `?pgbouncer=true&connection_limit=1`) — direct port 5432 does not work on Vercel serverless
+- `STRIPE_CONNECT_REDIRECT_URI` set to production URL
+- `NEXT_PUBLIC_APP_URL` set to production URL
+- Auto-deploys on every push to `main`
+
+#### Railway (Python agents)
+- Root directory: `apps/agents`
+- Dockerfile detected automatically (`railway.toml` sets `builder = "dockerfile"`)
+- Start command hardcoded to port 8000 in `railway.toml` — Railway `$PORT` injection was unreliable
+- All env vars set: `DATABASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `ENVIRONMENT=production`
+
+#### Stripe Webhook
+- Endpoint registered: `https://chrunsheild-production.up.railway.app/webhooks/stripe`
+- Events: `invoice.paid` + `invoice.payment_failed`
+- Signing secret stored as `STRIPE_WEBHOOK_SECRET` in Railway
+
+#### Sidebar UI fixes (April 7, 2026)
+- Sidebar content wrapped in `overflowY: auto` scrollable container so Settings/Help remain reachable when InfoCard is visible
+- All scrollbars hidden globally in dashboard via `*::-webkit-scrollbar { display: none }` in `hide-scroll.css`
+- Nav item height reduced 44px → 38px, font size 13px → 12px to prevent overlap
+- InfoCard made compact (smaller padding, shorter text, ✕ dismiss button)
+- `flex: 1` removed from main nav div so bottom nav doesn't get pushed out of view
+
+#### Known pending
+- Slack/Discord OAuth redirect URIs still point to ngrok (local dev) — update to production URLs in Vercel env vars + Slack/Discord developer portals when ready
+- `STRIPE_CLIENT_ID` needs full `ca_...` value confirmed in Vercel
+- `ANTHROPIC_MODEL` was accidentally added as `ANTHROPIC_MODE` in Vercel — fix spelling
+
+---
 
 ### Stripe Connect + retention offer fixes (April 6, 2026)
 
