@@ -41,9 +41,9 @@
 - `flex: 1` removed from main nav div so bottom nav doesn't get pushed out of view
 
 #### Known pending
-- Slack/Discord OAuth redirect URIs still point to ngrok (local dev) — update to production URLs in Vercel env vars + Slack/Discord developer portals when ready
-- `STRIPE_CLIENT_ID` needs full `ca_...` value confirmed in Vercel
-- `ANTHROPIC_MODEL` was accidentally added as `ANTHROPIC_MODE` in Vercel — fix spelling
+~~- Slack/Discord OAuth redirect URIs still point to ngrok (local dev) — update to production URLs in Vercel env vars + Slack/Discord developer portals when ready~~ ✅ Fixed in Vercel production
+~~- `STRIPE_CLIENT_ID` needs full `ca_...` value confirmed in Vercel~~ ✅ Fixed in Vercel production
+~~- `ANTHROPIC_MODEL` was accidentally added as `ANTHROPIC_MODE` in Vercel — fix spelling~~ ✅ Fixed in Vercel production
 
 ---
 

@@ -21,7 +21,6 @@ import {
   InfoCard,
   InfoCardContent,
   InfoCardTitle,
-  InfoCardDescription,
   InfoCardFooter,
   InfoCardDismiss,
   InfoCardAction,
@@ -56,9 +55,9 @@ function NavOption({ item, selected, open }: { item: NavItem; selected: boolean;
   const baseStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
-    height: 38,
+    height: 32,
     width: "100%",
-    borderRadius: 8,
+    borderRadius: 6,
     border: "none",
     cursor: "pointer",
     textDecoration: "none",
@@ -85,17 +84,17 @@ function NavOption({ item, selected, open }: { item: NavItem; selected: boolean;
       onMouseLeave={e => { if (!selected) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
     >
       <div style={{
-        width: 38,
-        height: 38,
+        width: 32,
+        height: 32,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
       }}>
-        <HugeiconsIcon icon={item.icon} size={20} strokeWidth={1.5} />
+        <HugeiconsIcon icon={item.icon} size={17} strokeWidth={1.5} />
       </div>
       {open && (
-        <span style={{ fontSize: 12, fontWeight: 500, whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: 11, fontWeight: 500, whiteSpace: "nowrap" }}>
           {item.title}
         </span>
       )}
@@ -220,7 +219,7 @@ export function DashboardSidebar() {
       {/* Scrollable middle: main nav + info card + bottom nav */}
       <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column", paddingBottom: 48 }}>
         {/* Main nav */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {mainNav.map(item => (
             <NavOption key={item.href + item.title} item={item} selected={isSelected(item.href)} open={open} />
           ))}
@@ -259,9 +258,9 @@ export function DashboardSidebar() {
         )}
 
         {/* Bottom nav */}
-        <div style={{ borderTop: "1px solid var(--cs-border, #e4e4e7)", paddingTop: 8, display: "flex", flexDirection: "column", gap: 2 }}>
+        <div style={{ borderTop: "1px solid var(--cs-border, #e4e4e7)", paddingTop: 4, display: "flex", flexDirection: "column", gap: 1 }}>
           {open && (
-            <div style={{ padding: "4px 12px 4px", fontSize: 10, fontWeight: 600, color: "var(--cs-text-muted, #71717a)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            <div style={{ padding: "2px 12px 2px", fontSize: 10, fontWeight: 600, color: "var(--cs-text-muted, #71717a)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
               Account
             </div>
           )}
@@ -290,22 +289,22 @@ export function DashboardSidebar() {
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
-          padding: "10px 4px",
+          padding: "7px 4px",
           color: "var(--cs-text-muted, #71717a)",
           transition: "background 0.15s",
         }}
         onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "var(--cs-bg, #fafafa)"; }}
         onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
       >
-        <div style={{ width: 44, height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 32, height: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <HugeiconsIcon
             icon={open ? ArrowLeft01Icon : ArrowRight01Icon}
-            size={16}
+            size={14}
             strokeWidth={1.5}
           />
         </div>
         {open && (
-          <span style={{ fontSize: 12, fontWeight: 500, color: "var(--cs-text-secondary, #52525b)" }}>Collapse</span>
+          <span style={{ fontSize: 11, fontWeight: 500, color: "var(--cs-text-secondary, #52525b)" }}>Collapse</span>
         )}
       </button>
     </nav>
