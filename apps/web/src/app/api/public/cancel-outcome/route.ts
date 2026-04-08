@@ -368,7 +368,9 @@ const FEE_RATE = 0.15;
 type OfferType = "pause" | "extension" | "discount" | "downgrade" | "empathy";
 
 /** Offer types where the save is confirmed immediately (no need to wait for payment). */
-const IMMEDIATE_CONFIRM = new Set<OfferType>(["pause", "empathy"]);
+// pause is deferred — fee charged after subscriber's invoice.paid fires post-pause
+// empathy is caught by monthly billing sweep (no Stripe invoice to match against)
+const IMMEDIATE_CONFIRM = new Set<OfferType>(["empathy"]);
 
 function corsHeaders(): HeadersInit {
   return {
@@ -472,7 +474,11 @@ export async function POST(request: Request) {
   let feeCharged: Decimal | null = null;
 
   if (saved && confirmImmediately) {
-    // Pause/empathy: full MRR  subscriber resumes at original price
+    // empathy: full MRR retained, charge immediately via monthly sweep
+    savedValue = mrr;
+    feeCharged = mrr.mul(FEE_RATE).toDecimalPlaces(2);
+  } else if (saved && offerType === "pause") {
+    // Pre-calculate expected fee — actual charge fires on invoice.paid after pause ends
     savedValue = mrr;
     feeCharged = mrr.mul(FEE_RATE).toDecimalPlaces(2);
   } else if (saved && offerType === "discount") {

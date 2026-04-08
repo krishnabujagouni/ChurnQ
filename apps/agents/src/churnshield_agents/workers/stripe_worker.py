@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 FEE_RATE = Decimal("0.15")
 
 # Offer types that wait for invoice.paid before confirming the save
-DEFERRED_OFFER_TYPES = {"extension", "discount", "downgrade"}
+# pause included: fee charged after subscriber's invoice.paid fires when pause ends
+DEFERRED_OFFER_TYPES = {"extension", "discount", "downgrade", "pause"}
 
 
 def _as_dict(payload: Any) -> dict[str, Any]:

@@ -14,10 +14,8 @@ Flow (product doc §3.1):
 5. Stamp fee_billed_at either way so we never revisit the row.
 
 Fee basis and timing per offer type:
-  pause      → 15% of full MRR    charged by billing sweep after 30 days
-               Pause lasts ~1 month; at day 30 subscription resumes and subscriber pays.
-               Sweep verifies subscription active (resumed) before charging merchant.
-  empathy    → 15% of full MRR    charged by billing sweep after 30 days
+  pause      → 15% of full MRR    charged by stripe_worker on invoice.paid after pause ends
+  empathy    → 15% of full MRR    charged by THIS sweep after 30 days
                No payment event to verify, so wait to confirm subscriber stayed.
   extension  → 15% of full MRR    charged immediately by stripe_worker on invoice.paid
   discount   → 15% of net MRR     charged immediately by stripe_worker on invoice.paid
