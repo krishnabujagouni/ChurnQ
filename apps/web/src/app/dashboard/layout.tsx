@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div style={{ flex: 1, position: "relative", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {/* Floating account button  top-right of content, no bar */}
         <div style={{ position: "absolute", top: 28, right: 32, zIndex: 10 }}>
-          <ClerkUserButton afterSignOutUrl="/" />
+          <ClerkUserButton />
         </div>
 
         <main style={{

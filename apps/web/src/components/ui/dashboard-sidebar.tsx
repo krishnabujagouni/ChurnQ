@@ -16,6 +16,7 @@ import {
   ArrowRight01Icon,
   ArrowLeft01Icon,
   Plug01Icon,
+  CreditCardIcon,
 } from "@hugeicons/core-free-icons";
 import {
   InfoCard,
@@ -44,6 +45,7 @@ const mainNav: NavItem[] = [
   { icon: BubbleChatSparkIcon, title: "AI Analyst",      href: "/dashboard/feedback" },
   { icon: SourceCodeIcon,      title: "Integration",     href: "/dashboard/integration" },
   { icon: Plug01Icon,          title: "Connections",     href: "/dashboard/connections" },
+  { icon: CreditCardIcon,     title: "Billing",         href: "/dashboard/billing" },
 ];
 
 const bottomNav: NavItem[] = [

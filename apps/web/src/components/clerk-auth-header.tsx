@@ -6,15 +6,23 @@ import { useEffect, useState } from "react";
 /**
  * UserButton in an RSC layout: portal subtree differs after hydrate. Gate on mount.
  */
-export function ClerkUserButton({ afterSignOutUrl = "/" }: { afterSignOutUrl?: string }) {
+export function ClerkUserButton() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div style={{ width: 36, height: 36, minWidth: 36, minHeight: 36 }} aria-hidden />;
+    return <div style={{ width: 32, height: 32, minWidth: 32, minHeight: 32 }} aria-hidden />;
   }
 
-  return <UserButton afterSignOutUrl={afterSignOutUrl} />;
+  return (
+    <UserButton
+      appearance={{
+        elements: {
+          avatarBox: { width: 32, height: 32 },
+        },
+      }}
+    />
+  );
 }
 
 /**
