@@ -34,7 +34,7 @@ Returns all webhook endpoints for your tenant.
   {
     "id": "whe_abc123",
     "url": "https://yourserver.com/webhook",
-    "events": ["cancel_intent.created", "cancel_intent.declined"],
+    "events": ["save.created", "high_risk.detected"],
     "enabled": true,
     "label": null,
     "createdAt": "2026-04-01T10:00:00.000Z"
@@ -68,7 +68,7 @@ POST /api/webhooks
 ```json
 {
   "url": "https://yourserver.com/webhook",
-  "events": ["cancel_intent.created", "cancel_intent.declined"],
+  "events": ["save.created", "high_risk.detected"],
   "label": "my-endpoint"
 }
 ```
@@ -83,9 +83,7 @@ POST /api/webhooks
 
 | Event | Description |
 |-------|-------------|
-| `cancel_intent.created` | Subscriber opens cancellation flow |
-| `cancel_intent.accepted` | Subscriber accepts the retention offer |
-| `cancel_intent.declined` | Subscriber declines and cancels |
+| `save.created` | Subscriber accepted an offer and clicked "Keep my subscription" |
 | `high_risk.detected` | AI flags subscriber as high churn risk |
 | `webhook.test` | Manual test ping |
 
@@ -95,7 +93,7 @@ POST /api/webhooks
 {
   "id": "whe_abc123",
   "url": "https://yourserver.com/webhook",
-  "events": ["cancel_intent.created", "cancel_intent.declined"],
+  "events": ["save.created", "high_risk.detected"],
   "enabled": true,
   "label": "my-endpoint",
   "secret": "whsec_a1b2c3d4...",
@@ -144,7 +142,7 @@ Partially update an endpoint. Only the fields you include are changed.
   "id": "whe_abc123",
   "enabled": false,
   "url": "https://yourserver.com/webhook",
-  "events": ["cancel_intent.created"],
+  "events": ["save.created"],
   "label": null,
   "createdAt": "2026-04-01T10:00:00.000Z"
 }
@@ -254,7 +252,7 @@ res = httpx.post(
     },
     json={
         "url": "https://yourserver.com/webhook",
-        "events": ["cancel_intent.created", "cancel_intent.declined", "high_risk.detected"],
+        "events": ["save.created", "high_risk.detected"],
     },
 )
 res.raise_for_status()

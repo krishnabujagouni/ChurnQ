@@ -61,9 +61,7 @@ ChurnShield sends the following events to your Zapier URL:
 
 | Event | When it fires |
 |-------|--------------|
-| `cancel_intent.created` | A subscriber opens the cancellation flow |
-| `cancel_intent.accepted` | A subscriber accepts the retention offer |
-| `cancel_intent.declined` | A subscriber declines the offer and cancels |
+| `save.created` | A subscriber accepted an offer and clicked "Keep my subscription" |
 | `high_risk.detected` | AI flags a subscriber as high churn risk |
 | `webhook.test` | Fired manually from the Connections page |
 
@@ -73,14 +71,15 @@ ChurnShield sends the following events to your Zapier URL:
 
 ```json
 {
-  "event": "cancel_intent.created",
-  "tenantId": "ten_abc123",
+  "event": "save.created",
   "timestamp": "2026-04-06T14:22:01.000Z",
   "data": {
-    "customerId": "cus_Abc123",
-    "subscriptionId": "sub_Xyz789",
-    "cancelReason": "too_expensive",
-    "mrr": 49
+    "tenant_id": "uuid",
+    "subscriber_id": "cus_abc123",
+    "subscriber_email": "user@example.com",
+    "offer_type": "discount",
+    "discount_pct": 25,
+    "mrr_saved": 36.75
   }
 }
 ```

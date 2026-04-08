@@ -1,200 +1,248 @@
 ---
 title: "HMAC Signing"
-description: "Verify that webhook payloads are genuinely from ChurnShield."
+description: "Secure your embed so only your server can start a retention session."
 ---
 
 ## Overview
 
-Every webhook request ChurnShield sends includes an `X-ChurnShield-Signature` header. The value is an HMAC-SHA256 digest of the raw request body, signed with your endpoint's secret. Verifying this signature confirms the request was not tampered with and originated from ChurnShield.
+When the ChurnShield snippet calls `ChurnShield.identify()`, it sends the subscriber's ID to ChurnShield's servers. Without signing, anyone who knows your `data-app-id` could pass a fake subscriber ID and trigger the retention chat.
+
+HMAC signing solves this: your server computes a cryptographic signature of the `subscriberId` and passes it as `authHash`. ChurnShield verifies the signature before creating a session. Forged requests are rejected.
 
 <Warning>
-  Always verify the signature in production. Skipping verification means any party that knows your webhook URL can send fake events to your system.
+  Always activate HMAC signing before going live. Running unsigned in production is a security risk.
 </Warning>
 
 ---
 
-## How signing works
+## How it works
 
-1. ChurnShield serialises the event payload to JSON.
-2. It computes `HMAC-SHA256(secret, body)` where `secret` is the signing secret for that endpoint.
-3. It sends the hex-encoded digest as `X-ChurnShield-Signature: sha256=<hex>`.
+1. Your server computes `HMAC-SHA256(CHURNSHIELD_EMBED_SECRET, subscriberId)` and sends the hex digest to your frontend.
+2. Your frontend passes the hex string as `authHash` in `ChurnShield.identify()`.
+3. ChurnShield verifies the hash using the same secret. If it doesn't match, the request is rejected with `invalid_auth_hash`.
 
-Your server recomputes the same digest and compares it to the header value using a constant-time comparison to prevent timing attacks.
-
----
-
-## Finding your signing secret
-
-1. Go to [ChurnShield → Connections](https://app.churnshield.ai/dashboard/connections).
-2. Expand the **Webhooks** section.
-3. Click the **eye** icon next to your endpoint to reveal the signing secret.
-
-The secret is prefixed with `whsec_` and is unique per endpoint.
+The `CHURNSHIELD_EMBED_SECRET` is a private key that never leaves your server.
 
 ---
 
-## Verification code
+## Finding your embed secret
+
+1. Go to **Dashboard → Integration**
+2. Your embed secret is shown in the **Step 3 — Secure your embed** section
+3. Click **Rotate embed secret** to generate a new one (invalidates all existing hashes)
+
+<Warning>
+  Never expose the embed secret in client-side code, environment variables prefixed with `NEXT_PUBLIC_`, or git repositories. Treat it like a password.
+</Warning>
+
+---
+
+## Computing the hash on your server
+
+The hash is `HMAC-SHA256(secret, subscriberId)` encoded as a lowercase hex string (64 characters).
 
 <CodeGroup>
 ```typescript Node.js / TypeScript
 import crypto from "crypto";
 
-function verifySignature(
-  rawBody: string,
-  signatureHeader: string,
-  secret: string
-): boolean {
-  const expected = crypto
-    .createHmac("sha256", secret)
-    .update(rawBody)
+function getChurnShieldAuthHash(subscriberId: string): string {
+  return crypto
+    .createHmac("sha256", process.env.CHURNSHIELD_EMBED_SECRET!)
+    .update(subscriberId)
     .digest("hex");
-
-  const received = signatureHeader.replace("sha256=", "");
-
-  return crypto.timingSafeEqual(
-    Buffer.from(expected, "hex"),
-    Buffer.from(received, "hex")
-  );
 }
 
-// Express example
-app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
-  const sig = req.headers["x-churnshield-signature"] as string;
-  const secret = process.env.CHURNSHIELD_WEBHOOK_SECRET!;
-
-  if (!verifySignature(req.body.toString(), sig, secret)) {
-    return res.status(401).json({ error: "Invalid signature" });
-  }
-
-  const event = JSON.parse(req.body.toString());
-  // handle event...
-  res.json({ ok: true });
-});
+// Example: in a Next.js API route or server component
+const authHash = getChurnShieldAuthHash(user.stripeCustomerId);
+// Pass authHash to the client via props, session, or API response
 ```
 
 ```python Python
-import hashlib
 import hmac
+import hashlib
+import os
 
-def verify_signature(raw_body: str, signature_header: str, secret: str) -> bool:
-    expected = hmac.new(
+def get_churnshield_auth_hash(subscriber_id: str) -> str:
+    secret = os.environ["CHURNSHIELD_EMBED_SECRET"]
+    return hmac.new(
         secret.encode("utf-8"),
-        raw_body.encode("utf-8"),
+        subscriber_id.encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
+```
 
-    received = signature_header.replace("sha256=", "")
+```ruby Ruby
+require "openssl"
 
-    return hmac.compare_digest(expected, received)
+def churnshield_auth_hash(subscriber_id)
+  OpenSSL::HMAC.hexdigest(
+    "SHA256",
+    ENV["CHURNSHIELD_EMBED_SECRET"],
+    subscriber_id
+  )
+end
+```
 
-
-# Flask example
-from flask import Flask, request, abort
-import json
-
-app = Flask(__name__)
-
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    sig = request.headers.get("X-ChurnShield-Signature", "")
-    secret = os.environ["CHURNSHIELD_WEBHOOK_SECRET"]
-
-    if not verify_signature(request.get_data(as_text=True), sig, secret):
-        abort(401)
-
-    event = request.get_json()
-    # handle event...
-    return {"ok": True}
+```php PHP
+function churnshield_auth_hash(string $subscriber_id): string {
+    return hash_hmac("sha256", $subscriber_id, $_ENV["CHURNSHIELD_EMBED_SECRET"]);
+}
 ```
 
 ```go Go
-package main
-
 import (
   "crypto/hmac"
   "crypto/sha256"
   "encoding/hex"
-  "net/http"
   "os"
-  "strings"
 )
 
-func verifySignature(body []byte, sigHeader, secret string) bool {
+func ChurnShieldAuthHash(subscriberID string) string {
+  secret := os.Getenv("CHURNSHIELD_EMBED_SECRET")
   mac := hmac.New(sha256.New, []byte(secret))
-  mac.Write(body)
-  expected := hex.EncodeToString(mac.Sum(nil))
-  received := strings.TrimPrefix(sigHeader, "sha256=")
-  return hmac.Equal([]byte(expected), []byte(received))
+  mac.Write([]byte(subscriberID))
+  return hex.EncodeToString(mac.Sum(nil))
 }
-
-func webhookHandler(w http.ResponseWriter, r *http.Request) {
-  body, _ := io.ReadAll(r.Body)
-  sig := r.Header.Get("X-ChurnShield-Signature")
-  secret := os.Getenv("CHURNSHIELD_WEBHOOK_SECRET")
-
-  if !verifySignature(body, sig, secret) {
-    http.Error(w, "Invalid signature", http.StatusUnauthorized)
-    return
-  }
-  // handle event...
-  w.Write([]byte(`{"ok":true}`))
-}
-```
-
-```php PHP
-<?php
-function verifySignature(string $rawBody, string $sigHeader, string $secret): bool {
-    $expected = hash_hmac("sha256", $rawBody, $secret);
-    $received = str_replace("sha256=", "", $sigHeader);
-    return hash_equals($expected, $received);
-}
-
-$rawBody = file_get_contents("php://input");
-$sigHeader = $_SERVER["HTTP_X_CHURNSHIELD_SIGNATURE"] ?? "";
-$secret = $_ENV["CHURNSHIELD_WEBHOOK_SECRET"];
-
-if (!verifySignature($rawBody, $sigHeader, $secret)) {
-    http_response_code(401);
-    echo json_encode(["error" => "Invalid signature"]);
-    exit;
-}
-
-$event = json_decode($rawBody, true);
-// handle event...
-echo json_encode(["ok" => true]);
 ```
 </CodeGroup>
 
 ---
 
-## Important implementation notes
+## Passing the hash to the frontend
+
+Compute the hash server-side and pass it to your frontend. Never compute it in the browser.
 
 <AccordionGroup>
-  <Accordion title="Use the raw body, not parsed JSON">
-    The signature is computed over the **raw bytes** of the request body. If you parse the JSON and re-serialise it before verifying, the byte order may differ and verification will fail.
+  <Accordion title="Next.js — server component or server action">
+    ```tsx
+    // app/account/page.tsx (server component)
+    import crypto from "crypto";
 
-    In Express, use `express.raw({ type: 'application/json' })` instead of `express.json()` on the webhook route. In Flask, use `request.get_data(as_text=True)` not `request.json`.
+    export default async function AccountPage() {
+      const user = await getCurrentUser();
+      const authHash = crypto
+        .createHmac("sha256", process.env.CHURNSHIELD_EMBED_SECRET!)
+        .update(user.stripeCustomerId)
+        .digest("hex");
+
+      return <AccountClient authHash={authHash} user={user} />;
+    }
+    ```
+
+    ```tsx
+    // app/account/client.tsx
+    "use client";
+    import { useEffect } from "react";
+
+    export function AccountClient({ authHash, user }) {
+      useEffect(() => {
+        window.ChurnShield?.identify({
+          subscriberId: user.stripeCustomerId,
+          subscriptionId: user.stripeSubscriptionId,
+          subscriptionMrr: user.monthlyPlanAmount,
+          authHash,
+        });
+      }, []);
+
+      return <button data-cs-cancel>Cancel subscription</button>;
+    }
+    ```
   </Accordion>
 
-  <Accordion title="Use constant-time comparison">
-    Always compare signatures with a constant-time function (`crypto.timingSafeEqual` in Node.js, `hmac.compare_digest` in Python, `hash_equals` in PHP). Standard string equality (`===`, `==`) leaks timing information that attackers can exploit.
+  <Accordion title="Express — inject into page template">
+    ```javascript
+    const crypto = require("crypto");
+
+    app.get("/account", requireAuth, (req, res) => {
+      const authHash = crypto
+        .createHmac("sha256", process.env.CHURNSHIELD_EMBED_SECRET)
+        .update(req.user.stripeCustomerId)
+        .digest("hex");
+
+      res.render("account", { authHash, user: req.user });
+    });
+    ```
+
+    ```html
+    <!-- views/account.ejs -->
+    <script>
+      ChurnShield.identify({
+        subscriberId: "<%= user.stripeCustomerId %>",
+        subscriptionMrr: <%= user.monthlyAmount %>,
+        authHash: "<%= authHash %>",
+      });
+    </script>
+    ```
   </Accordion>
 
-  <Accordion title="Each endpoint has its own secret">
-    The signing secret is per-endpoint, not per-tenant. If you have multiple webhook endpoints, each has its own secret. Make sure you use the correct secret for each endpoint.
-  </Accordion>
+  <Accordion title="API endpoint approach (SPA)">
+    Expose a small authenticated endpoint that returns the hash for the logged-in user:
 
-  <Accordion title="Rotating the secret">
-    To rotate a secret, delete the existing endpoint in ChurnShield and add a new one with the same URL. A new secret is generated automatically. Update your environment variable before deleting the old endpoint to avoid downtime.
+    ```typescript
+    // GET /api/cs-hash
+    export async function GET(req: Request) {
+      const session = await getServerSession();
+      if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+      const authHash = crypto
+        .createHmac("sha256", process.env.CHURNSHIELD_EMBED_SECRET!)
+        .update(session.user.stripeCustomerId)
+        .digest("hex");
+
+      return Response.json({ authHash });
+    }
+    ```
+
+    ```javascript
+    // Frontend
+    const { authHash } = await fetch("/api/cs-hash").then(r => r.json());
+    ChurnShield.identify({
+      subscriberId: user.stripeCustomerId,
+      authHash,
+    });
+    ```
   </Accordion>
 </AccordionGroup>
 
 ---
 
-## Headers reference
+## Activating signing in the dashboard
 
-| Header | Example value |
-|--------|--------------|
-| `X-ChurnShield-Signature` | `sha256=a1b2c3d4e5f6...` |
-| `X-ChurnShield-Event` | `cancel_intent.created` |
-| `Content-Type` | `application/json` |
+Once your backend is computing and passing the `authHash`, activate signing to enforce it:
+
+1. Go to **Dashboard → Integration**
+2. Click **Rotate embed secret** — this generates a new secret and locks the embed
+3. Update `CHURNSHIELD_EMBED_SECRET` in your server's environment variables with the new secret
+
+After activation, any request without a valid `authHash` is rejected. Test your integration before activating to avoid disrupting live users.
+
+---
+
+## Rotating the secret
+
+To rotate the secret:
+1. Click **Rotate embed secret** in Dashboard → Integration
+2. A new secret is generated immediately — the old one is invalidated
+3. Update `CHURNSHIELD_EMBED_SECRET` in your environment and redeploy
+
+<Warning>
+  Rotating the secret invalidates all previously computed hashes. Make sure your server is using the new secret before old hashes expire from caches.
+</Warning>
+
+---
+
+## Implementation notes
+
+<AccordionGroup>
+  <Accordion title="The subscriberId must match exactly">
+    The hash is computed over the exact string you pass as `subscriberId`. If you use `cus_abc123` in `identify()` but computed the hash over `CUS_ABC123`, verification will fail. Keep casing consistent.
+  </Accordion>
+
+  <Accordion title="Do not compute the hash in the browser">
+    If you compute the hash in JavaScript running in the browser, the secret is exposed in your source code or network requests. Always compute it server-side and pass it down as a value.
+  </Accordion>
+
+  <Accordion title="Grace mode still works without a hash">
+    If signing is not yet activated, requests without an `authHash` are accepted with a warning header (`X-ChurnShield-Warning: embed_unsigned`). Activate signing before going live.
+  </Accordion>
+</AccordionGroup>

@@ -1,178 +1,75 @@
 ---
-title: "POST /api/cancel-intent"
-description: "Create a cancellation intent and get a hosted offer page URL."
+title: "ChurnShield.identify()"
+description: "JavaScript API reference for identifying a subscriber and arming the cancel intercept."
 ---
 
-## Endpoint
+## Overview
 
-```
-POST https://app.churnshield.ai/api/cancel-intent
-```
-
-## Authentication
-
-Pass your API key in the `Authorization` header:
-
-```
-Authorization: Bearer YOUR_API_KEY
-```
-
-Your API key is available in [Settings → API](https://app.churnshield.ai/dashboard/settings).
+`ChurnShield.identify()` is called on your frontend after the `cs.js` snippet loads. It registers the current subscriber's details with ChurnShield so that when they click the cancel button, the retention chat can open with the right context.
 
 ---
 
-## Request
+## Syntax
 
-### Headers
-
-| Header | Value |
-|--------|-------|
-| `Authorization` | `Bearer <api_key>` |
-| `Content-Type` | `application/json` |
-
-### Body
-
-```json
-{
-  "customerId": "cus_Abc123",
-  "subscriptionId": "sub_Xyz789",
-  "returnUrl": "https://yourapp.com/account"
-}
+```javascript
+ChurnShield.identify(options);
 ```
+
+---
+
+## Parameters
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `customerId` | `string` | Yes | Stripe customer ID |
-| `subscriptionId` | `string` | Yes | Stripe subscription ID |
-| `returnUrl` | `string` | Yes | Absolute URL to redirect the subscriber after the offer is accepted or declined |
-| `cancelReason` | `string` | No | Pre-fill the cancellation reason. See [reason codes](#reason-codes) below |
-| `metadata` | `object` | No | Any additional key-value pairs to attach to the intent (max 10 keys) |
-
-### Reason codes
-
-If you already know why the subscriber is cancelling (e.g. they selected a reason on your own cancel page), pass it as `cancelReason` to skip ChurnShield's reason-selection step:
-
-| Code | Meaning |
-|------|---------|
-| `too_expensive` | Price is too high |
-| `not_using_it` | Not getting enough value |
-| `missing_features` | Missing a specific feature |
-| `switching_competitor` | Moving to a competitor |
-| `technical_issues` | Experiencing bugs or performance problems |
-| `other` | None of the above |
-
----
-
-## Response
-
-### 200 OK
-
-```json
-{
-  "id": "ci_abc123xyz",
-  "url": "https://app.churnshield.ai/offer/ci_abc123xyz",
-  "expiresAt": "2026-04-06T15:22:01.000Z"
-}
-```
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` | Unique ID of the cancel intent |
-| `url` | `string` | Redirect the subscriber to this URL to show the offer page |
-| `expiresAt` | `string` | ISO 8601 timestamp  the URL expires after 30 minutes |
-
-### Error responses
-
-| Status | Code | Meaning |
-|--------|------|---------|
-| `400` | `invalid_body` | Missing required field or invalid value |
-| `401` | `unauthorized` | Missing or invalid API key |
-| `404` | `subscription_not_found` | The subscription ID does not exist in the connected Stripe account |
-| `409` | `already_cancelled` | The subscription is already cancelled |
-| `429` | `rate_limited` | Too many requests  max 100/min per tenant |
-
-Error body:
-
-```json
-{
-  "error": "subscription_not_found",
-  "message": "No active subscription found with ID sub_Xyz789"
-}
-```
+| `subscriberId` | `string` | Yes | Stripe customer ID (`cus_...`). Used to look up the subscription in Stripe and identify the subscriber in your dashboard. |
+| `subscriptionId` | `string` | Recommended | Stripe subscription ID (`sub_...`). Without it, ChurnShield uses the customer's first active subscription. |
+| `subscriberEmail` | `string` | No | Shown in your dashboard instead of the raw `cus_...` ID. Not required for the flow to work. |
+| `subscriptionMrr` | `number` | Recommended | Monthly recurring revenue in USD (e.g. `49.00`). Used to calculate offer amounts and the 15% success fee. Defaults to `0` if omitted. |
+| `authHash` | `string` | Required in production | HMAC-SHA256 signature of the `subscriberId`. Computed server-side. See [HMAC Signing](/configuration/hmac-signing). |
 
 ---
 
 ## Example
 
-<CodeGroup>
-```bash cURL
-curl -X POST https://app.churnshield.ai/api/cancel-intent \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "customerId": "cus_Abc123",
-    "subscriptionId": "sub_Xyz789",
-    "returnUrl": "https://yourapp.com/account",
-    "cancelReason": "too_expensive"
-  }'
-```
-
-```typescript TypeScript
-const res = await fetch("https://app.churnshield.ai/api/cancel-intent", {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${process.env.CHURNSHIELD_API_KEY}`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    customerId: "cus_Abc123",
-    subscriptionId: "sub_Xyz789",
-    returnUrl: "https://yourapp.com/account",
-    cancelReason: "too_expensive",
-  }),
+```javascript
+ChurnShield.identify({
+  subscriberId: "cus_abc123",
+  subscriptionId: "sub_xyz789",
+  subscriberEmail: "user@example.com",
+  subscriptionMrr: 99.00,
+  authHash: "a3f9c2...",  // 64-char hex, computed server-side
 });
-
-if (!res.ok) {
-  const err = await res.json();
-  throw new Error(err.message);
-}
-
-const { url } = await res.json();
-window.location.href = url;
 ```
-
-```python Python
-import httpx
-
-res = httpx.post(
-    "https://app.churnshield.ai/api/cancel-intent",
-    headers={
-        "Authorization": f"Bearer {CHURNSHIELD_API_KEY}",
-        "Content-Type": "application/json",
-    },
-    json={
-        "customerId": "cus_Abc123",
-        "subscriptionId": "sub_Xyz789",
-        "returnUrl": "https://yourapp.com/account",
-        "cancelReason": "too_expensive",
-    },
-)
-res.raise_for_status()
-url = res.json()["url"]
-# redirect to url
-```
-</CodeGroup>
 
 ---
 
-## Webhooks
+## Behavior
 
-Creating a cancel intent fires the `cancel_intent.created` event to all enabled webhook endpoints. See [Webhooks](/integrations/webhooks) for the payload structure.
+- Safe to call multiple times. The last call wins.
+- Must be called before the subscriber clicks the cancel button.
+- If called without `authHash` and signing is not yet activated, the call succeeds with a `X-ChurnShield-Warning: embed_unsigned` header (grace mode).
+- If signing is activated and `authHash` is missing or invalid, the session creation is rejected and the cancel intercept will not fire.
 
 ---
 
-## Notes
+## What happens internally
 
-- The offer URL is **single-use** and expires after **30 minutes**. If the subscriber does not visit it in time, call this endpoint again to generate a new one.
-- ChurnShield uses the subscriber's Stripe data (plan name, MRR, subscription age) to personalise the offer  no additional data is needed.
-- Passing the same `subscriptionId` twice within the expiry window returns the existing intent rather than creating a duplicate.
+When `ChurnShield.identify()` is called and the subscriber then clicks `[data-cs-cancel]`:
+
+1. `cs.js` sends a `POST` to `/api/public/cancel-intent` with the subscriber details and `authHash`
+2. ChurnShield creates a `SaveSession` in the database
+3. The retention chat overlay opens with Aria
+4. On save: `POST /api/public/cancel-outcome` records the accepted offer and applies it in Stripe
+
+These internal endpoints are called automatically by `cs.js` — you do not need to call them directly.
+
+---
+
+## Error states
+
+| Symptom | Likely cause |
+|---------|-------------|
+| Chat does not open | `identify()` not called, or called after the click |
+| `invalid_auth_hash` in console | Wrong secret or `subscriberId` mismatch — see [HMAC Signing](/configuration/hmac-signing) |
+| `unknown_embed_key` in console | `data-app-id` is wrong or from a different environment |
+| `auth_hash_required` in console | Signing is activated but `authHash` was not passed |

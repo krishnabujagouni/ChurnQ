@@ -1,151 +1,118 @@
 ---
 title: "Offer Settings"
-description: "Customise the retention offers ChurnShield shows your subscribers."
+description: "Control exactly what retention offers ChurnShield's AI is allowed to make."
 ---
 
 ## Overview
 
-When a subscriber clicks cancel, ChurnShield's AI selects the most appropriate offer from your configured offer types. You can control which offer types are active, set discount amounts, and customise the copy shown on the offer page.
+When a subscriber clicks cancel, ChurnShield's AI (Aria) selects the most appropriate offer from the options you have enabled. You control which offer types are active, the discount amounts, the duration, and any custom instructions for Aria.
 
 ---
 
 ## Accessing offer settings
 
-Go to [ChurnShield → Settings → Offers](https://app.churnshield.ai/dashboard/settings/offers).
-
----
-
-## Offer types
-
-| Offer type | What happens | Best for |
-|------------|-------------|----------|
-| **Discount** | ChurnShield applies a percentage or fixed-amount coupon to the subscription via Stripe | Price-sensitive subscribers |
-| **Pause** | Subscription is paused for 1–3 months, then resumes automatically | Subscribers who need a break |
-| **Downgrade** | Subscriber is switched to a lower-tier plan | Over-subscribed power users |
-| **Free month** | One billing cycle is waived | High-LTV subscribers worth retaining at any cost |
-| **Custom** | You supply the offer text; ChurnShield records the outcome but takes no automatic Stripe action | Unique cases, manual follow-up |
+Go to [ChurnShield → Settings](https://app.churnshield.ai/dashboard/settings).
 
 ---
 
 ## Discount offers
 
-<Steps>
-  <Step title="Enable the Discount offer type">
-    Toggle **Discount** on in Settings → Offers.
-  </Step>
+Discount offers apply a percentage coupon to the subscriber's Stripe subscription. Aria starts with the lowest enabled tier and escalates to higher tiers only if the subscriber is still pushing to cancel.
 
-  <Step title="Set the discount amount">
-    Enter a percentage (e.g. `20`) or a fixed amount (e.g. `$10`). ChurnShield will create a Stripe coupon automatically when the offer is accepted.
-  </Step>
+### Discount tiers
 
-  <Step title="Set the duration">
-    Choose **once**, **3 months**, or **forever**. This maps directly to Stripe's coupon `duration` field.
-  </Step>
-
-  <Step title="Set the headline and body copy">
-    Customise the text shown on the offer page. Use `{{discount}}` as a placeholder for the amount:
-
-    > "Before you go  how about **{{discount}} off** your next 3 months?"
-  </Step>
-</Steps>
+Select which percentages Aria is allowed to offer: **10% off**, **25% off**, and/or **40% off**. Uncheck all three to disable price-reduction offers entirely.
 
 <Info>
-  ChurnShield charges a **15% fee** on the MRR saved by each accepted discount offer. This is calculated as `0.15 × monthly_plan_amount × coupon_months`. No fee is charged for declined offers or other offer types.
+  Aria always starts with the lowest tier. She only offers higher discounts if the subscriber continues to push back — she won't lead with the maximum discount.
 </Info>
 
+### Discount duration
+
+Choose how many months the discount applies before billing returns to full price: **1, 2, 3, 6, or 12 months**. Aria quotes this exact number in the chat.
+
+ChurnShield creates a Stripe coupon automatically when the offer is accepted:
+- Coupon ID format: `churnshield_ret_{pct}p_{months}m` (e.g. `churnshield_ret_25p_3m`)
+- Duration: repeating for the selected number of months
+- ChurnShield coupons never stack — a new save replaces the previous retention coupon
+
 ---
 
-## Pause offers
+## Retention options
 
-Pausing a subscription stops billing temporarily without cancelling. The subscription resumes automatically after the pause period.
+### Allow subscription pause
+
+When enabled, Aria can offer a 1-month pause as an alternative to cancelling. The subscription resumes automatically after the pause period.
+
+ChurnShield sets `pause_collection: { behavior: "mark_uncollectible" }` on the Stripe subscription when the offer is accepted.
+
+### Allow free extension
+
+When enabled, Aria can offer 1–2 weeks free before cancelling. ChurnShield applies a negative customer balance credit equal to 2 weeks of the subscriber's MRR, which is applied toward their next invoice.
+
+---
+
+## Plan downgrade
+
+When enabled, Aria can offer to switch the subscriber to a cheaper plan as an alternative to cancelling.
 
 <Steps>
-  <Step title="Enable Pause">
-    Toggle **Pause** on in Settings → Offers.
+  <Step title="Enable Allow plan downgrade">
+    Toggle **Allow plan downgrade** on in Settings.
   </Step>
-
-  <Step title="Choose pause duration options">
-    Select which durations subscribers can choose from: **1 month**, **2 months**, or **3 months**. You can enable multiple options  ChurnShield will present them as a choice.
+  <Step title="Connect Stripe (if not already)">
+    Stripe must be connected — ChurnShield imports your active prices automatically.
   </Step>
-
-  <Step title="Customise copy">
-    Example headline: "Need a break? Pause your subscription and come back when you're ready."
+  <Step title="Select downgrade plans">
+    Use the dropdown to add one or more Stripe prices as downgrade options. Each plan shows its name and monthly amount.
   </Step>
 </Steps>
 
+When accepted, ChurnShield swaps the subscription to the selected plan at the **next billing cycle** — no proration is applied.
+
 <Warning>
-  Pause requires Stripe's **subscription pause** feature. This is available on all Stripe plans but must be enabled in your Stripe Dashboard under **Billing → Settings → Subscriptions**.
+  Downgrade requires Stripe Connect. The plan switch is applied at the next renewal, not immediately.
 </Warning>
 
 ---
 
-## Downgrade offers
+## Custom message for Aria
 
-Downgrading switches the subscriber to a lower-tier plan you specify.
+Add a custom instruction (up to 300 characters) that Aria follows verbatim in every conversation. Use this to:
 
-<Steps>
-  <Step title="Enable Downgrade">
-    Toggle **Downgrade** on in Settings → Offers.
-  </Step>
-
-  <Step title="Select the target plan">
-    Choose the Stripe Price ID to downgrade to. ChurnShield will list all active prices from your connected Stripe account.
-  </Step>
-
-  <Step title="Customise copy">
-    Example: "Our **Starter plan** at $9/month might be a better fit  interested?"
-  </Step>
-</Steps>
+- Tell Aria to mention an upcoming feature: *"Always mention that feature X is launching next month"*
+- Restrict what she can discuss: *"Never mention competitors by name"*
+- Adjust her tone: *"Keep responses very brief — subscribers prefer short answers"*
 
 ---
 
-## AI personalisation
+## How Aria selects an offer
 
-ChurnShield's AI uses the subscriber's cancellation reason, MRR, and subscription age to select the most appropriate offer type. You do not need to configure this  it is automatic.
+Aria uses the subscriber's cancellation reason, MRR, and subscription age to pick the most appropriate offer from the types you have enabled:
 
 | Cancellation reason | Most likely offer |
-|--------------------|-------------------|
-| `too_expensive` | Discount or Downgrade |
-| `not_using_it` | Pause |
-| `missing_features` | Custom (with manual follow-up) |
-| `switching_competitor` | Discount |
-| `other` | Discount (default) |
+|---------------------|-------------------|
+| Price too high | Discount (lowest tier first) |
+| Not using it | Pause |
+| Needs a break | Pause or free extension |
+| Switching competitor | Discount |
+| Over-subscribed | Plan downgrade |
+| Other | Discount (default) |
 
-To override AI selection and force a specific offer type for all subscribers, enable **Single offer mode** in Settings → Offers.
-
----
-
-## Offer page branding
-
-You can customise the visual appearance of the offer page:
-
-| Setting | Description |
-|---------|-------------|
-| **Logo** | Shown at the top of the offer page. Upload a PNG or SVG. |
-| **Brand colour** | Used for the primary button. Defaults to `#18181b`. |
-| **Company name** | Shown in the offer headline. |
-| **Support email** | Shown as a fallback contact link. |
+Aria will not offer something you have disabled — if only pause is enabled, she only offers a pause.
 
 ---
 
-## Grace mode
+## The 15% success fee
 
-Grace mode prevents cancellation even if a subscriber declines the offer. Instead of cancelling immediately, the subscription enters a **7-day grace period** during which the subscriber can reconsider.
+ChurnShield charges 15% of the MRR retained per successful save. Fee timing by offer type:
 
-<Warning>
-  Enable grace mode only if your terms of service allow it. Forcing a billing cycle after a subscriber has explicitly declined can lead to chargebacks.
-</Warning>
+| Offer type | When the fee is charged |
+|------------|------------------------|
+| Discount | After the first discounted invoice pays (`invoice.paid`) |
+| Pause | Immediately on save |
+| Free extension | After the next invoice pays |
+| Plan downgrade | After the first invoice at the new price pays |
+| Empathy (no offer) | Immediately on save |
 
-To enable: Settings → Offers → **Grace mode** toggle.
-
----
-
-## Testing offers
-
-Use a Stripe test-mode subscription to exercise the full offer flow without real billing:
-
-1. Create a test customer and subscription in the [Stripe test dashboard](https://dashboard.stripe.com/test/subscriptions).
-2. Call `/api/cancel-intent` with the test subscription ID.
-3. The offer page will appear  accepting it applies a real test coupon or pause in Stripe test mode.
-
-All test events are clearly marked `livemode: false` in Stripe and do not affect your live data.
+No fee is charged if the subscriber declines.

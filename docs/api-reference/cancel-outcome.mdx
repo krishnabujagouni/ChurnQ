@@ -1,196 +1,103 @@
 ---
-title: "GET /api/cancel-outcome"
-description: "Retrieve the outcome of a cancellation intent after the subscriber has made a decision."
+title: "Save Events"
+description: "What gets recorded and fired when a subscriber accepts a retention offer."
 ---
 
-## Endpoint
+## Overview
 
-```
-GET https://app.churnshield.ai/api/cancel-outcome/{intentId}
-```
-
-## Authentication
-
-```
-Authorization: Bearer YOUR_API_KEY
-```
+When a subscriber clicks "Keep my subscription" in the retention chat, ChurnShield records the outcome, applies the offer in Stripe, and fires a `save.created` webhook event to all your enabled endpoints.
 
 ---
 
-## When to use this
+## What gets recorded
 
-You typically do not need to poll this endpoint  the `returnUrl` you supplied to `/api/cancel-intent` receives `?cs_result=accepted` or `?cs_result=declined` when the subscriber finishes. Use this endpoint when:
+Every save creates a `SaveSession` record with the following data:
 
-- You need to fetch the outcome server-side (e.g. in a webhook processor).
-- You want to retrieve the offer type that was presented and accepted.
-- You are building a dashboard or audit log of cancellation outcomes.
+| Field | Description |
+|-------|-------------|
+| `sessionId` | Unique session ID |
+| `tenantId` | Your ChurnShield tenant |
+| `subscriberId` | Stripe customer ID passed in `ChurnShield.identify()` |
+| `stripeSubscriptionId` | Stripe subscription the offer was applied to |
+| `subscriptionMrr` | Monthly value at time of save |
+| `offerType` | `discount`, `pause`, `extension`, `downgrade`, or `empathy` |
+| `offerAccepted` | `true` |
+| `discountPct` | Discount percentage (discount offers only) |
+| `targetPriceId` | Stripe Price ID (downgrade offers only) |
+| `churnshieldFee` | 15% of MRR saved |
+| `feeBilledAt` | Timestamp when the fee was charged (set after `invoice.paid` for deferred offers) |
+| `createdAt` | When the session was created |
+
+Sessions are visible in **Dashboard → Recent Sessions**.
 
 ---
 
-## Path parameters
+## The `save.created` webhook event
 
-| Parameter | Description |
-|-----------|-------------|
-| `intentId` | The `id` returned by `POST /api/cancel-intent` (format: `ci_...`) |
+Fired immediately when the subscriber accepts an offer. If you have webhooks configured, all enabled endpoints receive this event.
 
----
-
-## Response
-
-### 200 OK  decision made
+### Payload
 
 ```json
 {
-  "id": "ci_abc123xyz",
-  "status": "accepted",
-  "offerType": "discount",
-  "offerDetail": {
-    "discountPercent": 20,
-    "duration": "3_months",
-    "stripeCouponId": "CHURN20_3M"
-  },
-  "customerId": "cus_Abc123",
-  "subscriptionId": "sub_Xyz789",
-  "cancelReason": "too_expensive",
-  "decidedAt": "2026-04-06T14:35:22.000Z",
-  "createdAt": "2026-04-06T14:22:01.000Z"
+  "event": "save.created",
+  "timestamp": "2026-04-06T12:00:00.000Z",
+  "data": {
+    "tenant_id": "uuid",
+    "subscriber_id": "cus_abc123",
+    "subscriber_email": "user@example.com",
+    "offer_type": "discount",
+    "discount_pct": 25,
+    "mrr_saved": 36.75
+  }
 }
 ```
 
-### 200 OK  pending (subscriber has not decided yet)
-
-```json
-{
-  "id": "ci_abc123xyz",
-  "status": "pending",
-  "customerId": "cus_Abc123",
-  "subscriptionId": "sub_Xyz789",
-  "createdAt": "2026-04-06T14:22:01.000Z"
-}
-```
-
-### 200 OK  expired
-
-```json
-{
-  "id": "ci_abc123xyz",
-  "status": "expired",
-  "customerId": "cus_Abc123",
-  "subscriptionId": "sub_Xyz789",
-  "createdAt": "2026-04-06T14:22:01.000Z"
-}
-```
-
----
-
-## Response fields
+### `data` fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `string` | Cancel intent ID |
-| `status` | `string` | `pending`, `accepted`, `declined`, or `expired` |
-| `offerType` | `string` \| `null` | `discount`, `pause`, `downgrade`, `free_month`, or `custom`. `null` if status is not `accepted` |
-| `offerDetail` | `object` \| `null` | Details of the accepted offer. Shape depends on `offerType` |
-| `customerId` | `string` | Stripe customer ID |
-| `subscriptionId` | `string` | Stripe subscription ID |
-| `cancelReason` | `string` \| `null` | Reason the subscriber gave for cancelling |
-| `decidedAt` | `string` \| `null` | ISO 8601 timestamp when the subscriber made their decision |
-| `createdAt` | `string` | ISO 8601 timestamp when the intent was created |
-
-### `offerDetail` shapes
-
-**Discount:**
-```json
-{
-  "discountPercent": 20,
-  "duration": "3_months",
-  "stripeCouponId": "CHURN20_3M"
-}
-```
-
-**Pause:**
-```json
-{
-  "pauseMonths": 2,
-  "resumeAt": "2026-06-06T00:00:00.000Z"
-}
-```
-
-**Downgrade:**
-```json
-{
-  "fromPriceId": "price_PremiumMonthly",
-  "toPriceId": "price_StarterMonthly"
-}
-```
-
-**Free month:**
-```json
-{
-  "billingCycleWaived": 1,
-  "stripeCouponId": "CHURN_FREE1M"
-}
-```
+| `tenant_id` | `string` | Your ChurnShield tenant ID |
+| `subscriber_id` | `string` | Stripe customer ID |
+| `subscriber_email` | `string` \| `null` | Subscriber email if provided during identify |
+| `offer_type` | `string` | `discount`, `pause`, `extension`, `downgrade`, or `empathy` |
+| `discount_pct` | `number` \| `null` | Discount percentage — only present when `offer_type` is `discount` |
+| `mrr_saved` | `number` | MRR retained (full MRR for pause/empathy, discounted amount for discount) |
 
 ---
 
-## Error responses
+## What happens in Stripe after a save
 
-| Status | Code | Meaning |
-|--------|------|---------|
-| `401` | `unauthorized` | Missing or invalid API key |
-| `404` | `not_found` | No intent with this ID exists in your tenant |
-
----
-
-## Example
-
-<CodeGroup>
-```bash cURL
-curl https://app.churnshield.ai/api/cancel-outcome/ci_abc123xyz \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-```typescript TypeScript
-const res = await fetch(
-  `https://app.churnshield.ai/api/cancel-outcome/${intentId}`,
-  {
-    headers: {
-      "Authorization": `Bearer ${process.env.CHURNSHIELD_API_KEY}`,
-    },
-  }
-);
-
-const outcome = await res.json();
-
-if (outcome.status === "accepted") {
-  console.log(`Offer accepted: ${outcome.offerType}`);
-} else if (outcome.status === "declined") {
-  console.log("Subscriber declined  subscription cancelled");
-}
-```
-
-```python Python
-import httpx
-
-res = httpx.get(
-    f"https://app.churnshield.ai/api/cancel-outcome/{intent_id}",
-    headers={"Authorization": f"Bearer {CHURNSHIELD_API_KEY}"},
-)
-res.raise_for_status()
-outcome = res.json()
-
-if outcome["status"] == "accepted":
-    print(f"Offer accepted: {outcome['offerType']}")
-elif outcome["status"] == "declined":
-    print("Subscriber declined  subscription cancelled")
-```
-</CodeGroup>
+| Offer type | Stripe action |
+|------------|--------------|
+| `discount` | Repeating coupon applied to subscription for the configured number of months |
+| `pause` | `pause_collection: { behavior: "mark_uncollectible" }` set on subscription |
+| `extension` | Negative customer balance credit (2 weeks of MRR) |
+| `downgrade` | Subscription price swapped to the target plan at next billing cycle |
+| `empathy` | No Stripe action — conversation alone retained the subscriber |
 
 ---
 
-## Webhooks (preferred alternative)
+## Fee billing
 
-Instead of polling this endpoint, subscribe to `cancel_intent.accepted` and `cancel_intent.declined` webhook events. Webhooks are pushed instantly when the decision is made and are more efficient than polling.
+ChurnShield charges 15% of the MRR saved per successful save. Fee timing depends on offer type:
 
-See [Webhooks](/integrations/webhooks) for setup instructions.
+| Offer type | Fee timing |
+|------------|-----------|
+| `pause` | Immediately on save |
+| `empathy` | Immediately on save |
+| `discount` | After `invoice.paid` fires from Stripe (confirms subscriber paid at discounted rate) |
+| `extension` | After next `invoice.paid` fires |
+| `downgrade` | After first `invoice.paid` at the new plan price |
+
+The fee is charged via Stripe Connect to your connected Stripe account automatically.
+
+---
+
+## Receiving save events
+
+To get notified when a subscriber is saved:
+
+- **Slack / Discord** — connect in Dashboard → Connections. Alerts fire in real-time.
+- **Webhooks** — add any HTTPS endpoint in Dashboard → Connections → Webhooks. See [Webhooks](/integrations/webhooks).
+- **Zapier / Make** — paste your Catch Hook URL into the Zapier or Make card. See [Zapier](/integrations/zapier) or [Make](/integrations/make).
