@@ -3,9 +3,9 @@ import { createHmac, timingSafeEqual } from "crypto";
 const PREFIX = "v1";
 
 function getSecret(): string {
-  const s = process.env.ChurnQ_ONBOARD_SECRET;
+  const s = process.env.CHURNQ_ONBOARD_SECRET;
   if (!s) {
-    throw new Error("ChurnQ_ONBOARD_SECRET is not set");
+    throw new Error("CHURNQ_ONBOARD_SECRET is not set");
   }
   return s;
 }
