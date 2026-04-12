@@ -639,8 +639,8 @@ export default function LandingPage() {
           { href: "#features", label: "Features" },
           { href: "#pricing", label: "Pricing" },
           { href: "mailto:hello@churnq.com", label: "Contact" },
-          { href: "#", label: "Privacy" },
-          { href: "#", label: "Terms" },
+          { href: "/privacy", label: "Privacy" },
+          { href: "/terms", label: "Terms" },
         ]}
         brandIcon={
           <svg width="48" height="48" viewBox="0 0 512 512" fill="none" aria-hidden>

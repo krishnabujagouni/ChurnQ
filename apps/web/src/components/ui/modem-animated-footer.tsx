@@ -41,8 +41,7 @@ export const ModemAnimatedFooter = ({
               <div className="space-y-2 flex flex-col items-center flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[#09090b] text-3xl font-bold tracking-tight">
-                    <span style={{ color: "var(--cs-accent)" }}>Churn</span>
-                    Shield
+                    {brandName}
                   </span>
                 </div>
                 <p className="text-[#64748b] font-medium text-center w-full max-w-sm sm:w-96 px-4 sm:px-0 text-sm leading-relaxed">
