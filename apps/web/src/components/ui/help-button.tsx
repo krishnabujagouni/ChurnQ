@@ -1,29 +1,6 @@
 "use client";
 import { useState } from "react";
 
-const HELP_ITEMS = [
-  {
-    q: "How does ChurnQ work?",
-    a: "You add one script tag to your cancel page. When a subscriber clicks cancel, ChurnQ intercepts the click, opens an AI chat, and makes a retention offer. You only pay 15% if the subscriber stays.",
-  },
-  {
-    q: "How do I install the embed?",
-    a: "Go to Integration in the sidebar. Copy the script tag and paste it before </body> on your cancel page. Then call window.ChurnQ.identify() with the subscriber's ID and MRR.",
-  },
-  {
-    q: "When do I get charged?",
-    a: "On the 1st of each month. ChurnQ bundles all confirmed saves from the previous month and creates one Stripe charge via your connected Stripe account.",
-  },
-  {
-    q: "How do I connect Stripe?",
-    a: "Go to Connections in the sidebar and click Connect under Stripe. You'll be taken through the Stripe OAuth flow. This is required for ChurnQ to apply discounts and pauses to subscriptions.",
-  },
-  {
-    q: "What offer types are available?",
-    a: "Discount (up to your configured max %), pause, free extension, and plan downgrade. You can toggle each on/off and set limits in Settings → Retention Offers.",
-  },
-];
-
 export function HelpButton() {
   const [open, setOpen] = useState(false);
 
@@ -90,16 +67,7 @@ export function HelpButton() {
 
           {/* Body */}
           <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {HELP_ITEMS.map((item, i) => (
-                <div key={i} style={{ borderBottom: i < HELP_ITEMS.length - 1 ? "1px solid #f1f5f9" : "none", paddingBottom: i < HELP_ITEMS.length - 1 ? 16 : 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", marginBottom: 5 }}>{item.q}</div>
-                  <div style={{ fontSize: 12.5, color: "#64748b", lineHeight: 1.6 }}>{item.a}</div>
-                </div>
-              ))}
-
-              {/* Docs + Feature Requests links */}
-              <div style={{ paddingTop: 8, borderTop: "1px solid #f1f5f9", display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <a
                   href="https://docs.churnq.com"
                   target="_blank"
@@ -154,7 +122,6 @@ export function HelpButton() {
                     Email us
                   </a>
                 </div>
-              </div>
             </div>
           </div>
         </div>
