@@ -70,15 +70,25 @@ export const ModemAnimatedFooter = ({
 
               {navLinks.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-[#64748b] max-w-full px-4">
-                  {navLinks.map((link, index) => (
-                    <Link
-                      key={index}
-                      className="hover:text-[#09090b] duration-300"
-                      href={link.href}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                  {navLinks.map((link, index) =>
+                    link.href.startsWith("mailto:") || link.href.startsWith("http") ? (
+                      <a
+                        key={index}
+                        className="hover:text-[#09090b] duration-300"
+                        href={link.href}
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        key={index}
+                        className="hover:text-[#09090b] duration-300"
+                        href={link.href}
+                      >
+                        {link.label}
+                      </Link>
+                    )
+                  )}
                 </div>
               )}
             </div>
