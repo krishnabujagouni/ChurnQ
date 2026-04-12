@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 
-type Tab = "help" | "requests";
-
 const HELP_ITEMS = [
   {
     q: "How does ChurnQ work?",
@@ -28,7 +26,6 @@ const HELP_ITEMS = [
 
 export function HelpButton() {
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<Tab>("help");
 
   return (
     <>
@@ -87,55 +84,78 @@ export function HelpButton() {
           overflow: "hidden",
         }}>
           {/* Header */}
-          <div style={{ padding: "16px 20px 0", borderBottom: "1px solid #f1f5f9" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>Help & Support</div>
-            {/* Tabs */}
-            <div style={{ display: "flex", gap: 0 }}>
-              {(["help", "requests"] as Tab[]).map(t => (
-                <button key={t} onClick={() => setTab(t)} style={{
-                  background: "none",
-                  border: "none",
-                  borderBottom: tab === t ? "2px solid #18181b" : "2px solid transparent",
-                  padding: "6px 14px",
-                  fontSize: 13,
-                  fontWeight: tab === t ? 600 : 500,
-                  color: tab === t ? "#18181b" : "#71717a",
-                  cursor: "pointer",
-                  transition: "all 150ms ease",
-                  fontFamily: "inherit",
-                }}>
-                  {t === "help" ? "Help" : "Feature Requests"}
-                </button>
-              ))}
-            </div>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9" }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Help & Support</div>
           </div>
 
           {/* Body */}
           <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
-            {tab === "help" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                {HELP_ITEMS.map((item, i) => (
-                  <div key={i} style={{ borderBottom: i < HELP_ITEMS.length - 1 ? "1px solid #f1f5f9" : "none", paddingBottom: i < HELP_ITEMS.length - 1 ? 16 : 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", marginBottom: 5 }}>{item.q}</div>
-                    <div style={{ fontSize: 12.5, color: "#64748b", lineHeight: 1.6 }}>{item.a}</div>
-                  </div>
-                ))}
-                <div style={{ paddingTop: 8, borderTop: "1px solid #f1f5f9", fontSize: 12.5, color: "#64748b" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {HELP_ITEMS.map((item, i) => (
+                <div key={i} style={{ borderBottom: i < HELP_ITEMS.length - 1 ? "1px solid #f1f5f9" : "none", paddingBottom: i < HELP_ITEMS.length - 1 ? 16 : 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", marginBottom: 5 }}>{item.q}</div>
+                  <div style={{ fontSize: 12.5, color: "#64748b", lineHeight: 1.6 }}>{item.a}</div>
+                </div>
+              ))}
+
+              {/* Docs + Feature Requests links */}
+              <div style={{ paddingTop: 8, borderTop: "1px solid #f1f5f9", display: "flex", flexDirection: "column", gap: 10 }}>
+                <a
+                  href="https://churnsheild.mintlify.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    background: "#f8fafc", border: "1px solid #e2e8f0",
+                    borderRadius: 10, padding: "12px 14px",
+                    textDecoration: "none", color: "#0f172a",
+                    fontSize: 13, fontWeight: 600,
+                    transition: "all 150ms ease",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#18181b"; (e.currentTarget as HTMLAnchorElement).style.background = "#f1f5f9"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#e2e8f0"; (e.currentTarget as HTMLAnchorElement).style.background = "#f8fafc"; }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                  <span style={{ flex: 1 }}>Read the Docs</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>
+
+                <a
+                  href="https://app.userjot.com/cmnuo1mnc0y3i0iqy3mulay0g/d/requests?status=%5B%22PENDING%22%2C%22REVIEW%22%2C%22PLANNED%22%2C%22PROGRESS%22%5D&board=%5B%5D&tag=%5B%5D&order=newest&search="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    background: "#f8fafc", border: "1px solid #e2e8f0",
+                    borderRadius: 10, padding: "12px 14px",
+                    textDecoration: "none", color: "#0f172a",
+                    fontSize: 13, fontWeight: 600,
+                    transition: "all 150ms ease",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#18181b"; (e.currentTarget as HTMLAnchorElement).style.background = "#f1f5f9"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#e2e8f0"; (e.currentTarget as HTMLAnchorElement).style.background = "#f8fafc"; }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2.5" />
+                  </svg>
+                  <span style={{ flex: 1 }}>Request a Feature</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>
+
+                <div style={{ fontSize: 12.5, color: "#64748b", paddingTop: 4 }}>
                   Still stuck?{" "}
                   <a href="mailto:hello@churnq.com" style={{ color: "#18181b", fontWeight: 600, textDecoration: "underline" }}>
                     Email us
                   </a>
                 </div>
               </div>
-            ) : (
-              <div style={{ height: 420 }}>
-                <iframe
-                  src="https://app.userjot.com/cmnuo1mnc0y3i0iqy3mulay0g/d/requests?status=%5B%22PENDING%22%2C%22REVIEW%22%2C%22PLANNED%22%2C%22PROGRESS%22%5D&board=%5B%5D&tag=%5B%5D&order=newest&search="
-                  style={{ width: "100%", height: "100%", border: "none", borderRadius: 8 }}
-                  title="Feature Requests"
-                />
-              </div>
-            )}
+            </div>
           </div>
         </div>
       )}

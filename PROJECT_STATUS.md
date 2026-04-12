@@ -44,7 +44,7 @@
 - **Web (Vercel)**: `https://chrunsheild.vercel.app`
 - **Agents (Railway)**: `https://chrunsheild-production.up.railway.app`
 - **Health check**: `https://chrunsheild-production.up.railway.app/health`
-
+discord devloper : krishnabujagouni@gmail.com
 #### Vercel (Next.js web app)
 - Root directory: `apps/web`
 - All env vars set in Vercel dashboard (Production + Preview + Development)
