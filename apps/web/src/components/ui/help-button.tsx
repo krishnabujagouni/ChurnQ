@@ -101,7 +101,7 @@ export function HelpButton() {
               {/* Docs + Feature Requests links */}
               <div style={{ paddingTop: 8, borderTop: "1px solid #f1f5f9", display: "flex", flexDirection: "column", gap: 10 }}>
                 <a
-                  href="https://churnsheild.mintlify.app/"
+                  href="https://docs.churnq.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
