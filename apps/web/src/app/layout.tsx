@@ -9,6 +9,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: "ChurnQ  Stop Losing Subscribers",
   description: "AI-native subscription retention platform. Cancel flow agent, payment recovery, churn prediction.",
+  icons: {
+    icon: [
+      { url: "/churnQ-icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/churnQ-icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
