@@ -227,7 +227,7 @@ export function DashboardSidebar() {
 
         {/* Info card  dismissible tip, only shown when sidebar is expanded */}
         {open && (
-          <div style={{ padding: "0 4px 6px" }}>
+          <div style={{ padding: "8px 4px 6px", marginTop: "auto" }}>
             <InfoCard
               storageKey="sidebar-integration-tip"
               dismissType="forever"
@@ -258,7 +258,7 @@ export function DashboardSidebar() {
         )}
 
         {/* Bottom nav */}
-        <div style={{ marginTop: "auto", borderTop: "1px solid var(--cs-border, #e4e4e7)", paddingTop: 4, display: "flex", flexDirection: "column", gap: 1 }}>
+        <div style={{ borderTop: "1px solid var(--cs-border, #e4e4e7)", paddingTop: 4, display: "flex", flexDirection: "column", gap: 1 }}>
           {open && (
             <div style={{ padding: "2px 12px 2px", fontSize: 10, fontWeight: 600, color: "var(--cs-text-muted, #71717a)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
               Account
