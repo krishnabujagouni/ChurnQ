@@ -58,9 +58,10 @@ export default function OnboardingPage() {
       minHeight: "100vh",
       background: "#fafafa",
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       justifyContent: "center",
-      padding: 24,
+      padding: "40px 24px",
+      overflowY: "auto",
       fontFamily: "var(--font-inter, 'Inter', system-ui, sans-serif)",
     }}>
       <div style={{ width: "100%", maxWidth: 480 }}>
