@@ -499,7 +499,7 @@ export default function LandingPage() {
 
           <p style={{ textAlign: "center", marginTop: 24, fontSize: 13, color: "#64748b" }}>
             High-volume or enterprise?{" "}
-            <Link href="mailto:hello@churnq.com" style={{ color: "#18181b", fontWeight: 600, textDecoration: "none" }}>Talk to us</Link>
+            <a href="mailto:hello@churnq.com" style={{ color: "#18181b", fontWeight: 600, textDecoration: "none" }}>Talk to us</a>
           </p>
         </div>
       </section>
@@ -615,9 +615,9 @@ export default function LandingPage() {
 
           <p style={{ textAlign: "center", marginTop: 40, fontSize: 14, color: "#64748b" }}>
             Still have questions?{" "}
-            <Link href="mailto:hello@churnq.com" style={{ color: "#18181b", fontWeight: 600, textDecoration: "none" }}>
+            <a href="mailto:hello@churnq.com" style={{ color: "#18181b", fontWeight: 600, textDecoration: "none" }}>
               Email us →
-            </Link>
+            </a>
           </p>
         </div>
       </section>
