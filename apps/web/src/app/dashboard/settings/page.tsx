@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { generateEmbedAppId, generateEmbedHmacSecret } from "@/lib/tenant-embed";
 import { SaveButton } from "./save-button";
 import { PlansEditor } from "./plans-editor";
+import { ProductSelector } from "./product-selector";
 
 type PlanTier = { name: string; priceMonthly: number; stripePriceId?: string };
 
@@ -334,6 +335,19 @@ export default async function SettingsPage({
             <SaveButton label="Save offer settings" savedLabel="Saved!" />
           </form>
         </div>
+
+        {/* Protected Products — only shown when Stripe is connected */}
+        {tenant.stripeConnectId && (
+          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "28px 32px", marginTop: 0 }}>
+            <div style={{ marginBottom: 20 }}>
+              <h2 style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 700, color: "#0f172a" }}>Protected Products</h2>
+              <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>
+                Choose which Stripe products ChurnQ should intercept cancellations for. Leave all unchecked to protect every subscriber.
+              </p>
+            </div>
+            <ProductSelector />
+          </div>
+        )}
 
         {/* RIGHT  sticky sidebar */}
         <div style={{ position: "sticky", top: 24, display: "flex", flexDirection: "column", gap: 16 }}>
