@@ -8,7 +8,6 @@ const isPublic = createRouteMatcher([
   "/api/stripe/connect/(.*)",
   "/api/webhooks/(.*)",
   "/test-app/(.*)",
-  "/stripe-connect-popup(.*)",
 ]);
 
 export default clerkMiddleware((auth, req) => {

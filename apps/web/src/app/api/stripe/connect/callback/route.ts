@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { verifyConnectState } from "@/lib/connect-state";
@@ -18,17 +17,11 @@ export async function GET(request: Request) {
   const errDesc = url.searchParams.get("error_description");
   const base = appOrigin(request);
 
-  // Check if this was initiated from a popup
-  const cookieStore = cookies();
-  const isPopup = cookieStore.get("stripe_connect_popup")?.value === "1";
-
   if (err) {
-    const u = new URL(isPopup ? "/stripe-connect-popup" : "/dashboard/settings", base);
+    const u = new URL("/dashboard/connections", base);
     u.searchParams.set("stripe_error", err);
     if (errDesc) u.searchParams.set("stripe_error_description", errDesc);
-    const res = NextResponse.redirect(u);
-    res.cookies.delete("stripe_connect_popup");
-    return res;
+    return NextResponse.redirect(u);
   }
 
   const code = url.searchParams.get("code");
@@ -71,11 +64,7 @@ export async function GET(request: Request) {
     throw e;
   }
 
-  const res = NextResponse.redirect(
-    isPopup
-      ? new URL("/stripe-connect-popup?stripe_connected=1", base)
-      : new URL("/dashboard/settings?stripe_connected=1", base)
-  );
-  res.cookies.delete("stripe_connect_popup");
-  return res;
+  const u = new URL("/dashboard/connections", base);
+  u.searchParams.set("stripe_connected", "1");
+  return NextResponse.redirect(u);
 }

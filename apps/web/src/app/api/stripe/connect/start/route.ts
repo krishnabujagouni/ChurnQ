@@ -26,7 +26,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(u);
   }
 
-  const isPopup = new URL(request.url).searchParams.get("popup") === "1";
   const state = signConnectState(tenant.id);
 
   const params = new URLSearchParams({
@@ -42,20 +41,5 @@ export async function GET(request: Request) {
 
   const authorize = new URL("https://connect.stripe.com/oauth/authorize");
   authorize.search = params.toString();
-
-  const res = NextResponse.redirect(authorize);
-
-  // Store popup flag in a short-lived cookie so the callback knows where to redirect
-  if (isPopup) {
-    res.cookies.set("stripe_connect_popup", "1", {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 600, // 10 minutes
-      path: "/",
-    });
-  } else {
-    res.cookies.delete("stripe_connect_popup");
-  }
-
-  return res;
+  return NextResponse.redirect(authorize);
 }
