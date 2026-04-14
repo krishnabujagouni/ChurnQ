@@ -1,11 +1,28 @@
 # ChurnQ  Project Status
-*Last updated: April 12, 2026*
+*Last updated: April 13, 2026*
 
 ---
 
 ## For future sessions  what changed recently
 
 **Read this block first** when picking up the repo; it summarizes implementation not obvious from file names alone.
+
+### Multi-product foundation + UX fixes (April 13, 2026)
+
+#### `stripe_product_id` on SaveSession
+- **`save_sessions.stripe_product_id`** (nullable `VARCHAR(64)`) added to the DB via `prisma db push`.
+- **`apps/web/prisma/schema.prisma`**: `stripeProductId String? @map("stripe_product_id") @db.VarChar(64)` added to `SaveSession` model, just below `stripeSubscriptionId`.
+- **`apps/web/src/app/api/public/cancel-intent/route.ts`**: accepts optional `stripeProductId` in the request body, validates it starts with `prod_`, slices to 64 chars, and stores it on `prisma.saveSession.create`. Embed snippets can now pass `stripeProductId: "prod_xxx"` alongside `subscriptionId`.
+- **Why**: every future cancel event will have the product recorded. When per-product filtering (overview, subscribers, sessions, billing) is built, the data will already be there — no backfill needed.
+- **What's NOT built yet**: per-product filter UI, per-product metrics, product columns in dashboard tables. Those build on top of this one field.
+
+#### StripeProductTags — hide for single-product tenants
+- **`apps/web/src/app/dashboard/connections/stripe-product-tags.tsx`**: after products load, returns `null` if `products.length < 2`. Single-product tenants see nothing after connecting Stripe; multi-product tenants (2+) still get the inline tag selector.
+
+#### Onboarding loop fix
+- **`apps/web/src/app/onboarding/layout.tsx`**: server-component guard — if `tenant.onboarded === true`, redirects to `/dashboard` before rendering the onboarding page. Prevents already-onboarded users from landing back on the onboarding form (Clerk webhook race condition was fixed earlier with `upsert`; this is the layout-level safety net).
+
+---
 
 ### Stripe offer application fix (April 12, 2026)
 
