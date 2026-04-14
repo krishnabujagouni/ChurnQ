@@ -9,6 +9,7 @@ import { SlackConnectCard } from "@/app/dashboard/settings/slack-connect-card";
 import { DiscordConnectCard } from "@/app/dashboard/settings/discord-connect-card";
 import { WebhooksSection } from "./webhooks-section";
 import { ZapierMakeSection } from "./zapier-make-card";
+import { StripeConnectButton } from "./stripe-connect-button";
 
 const row: CSSProperties = {
   display: "flex",
@@ -125,26 +126,7 @@ export default async function ConnectionsPage() {
             )}
           </div>
           <div style={{ flexShrink: 0 }}>
-            {tenant.stripeConnectId ? (
-              <a
-                href="/api/stripe/connect/start"
-                style={{ fontSize: 12, color: "var(--cs-text-muted, #71717a)", textDecoration: "none", fontWeight: 500 }}
-              >
-                Reconnect →
-              </a>
-            ) : (
-              <a
-                href="/api/stripe/connect/start"
-                style={{
-                  display: "inline-flex", alignItems: "center",
-                  background: "var(--cs-text, #18181b)", color: "#fff",
-                  padding: "8px 18px", borderRadius: 8,
-                  fontSize: 13, fontWeight: 600, textDecoration: "none",
-                }}
-              >
-                Connect
-              </a>
-            )}
+            <StripeConnectButton connected={!!tenant.stripeConnectId} />
           </div>
         </div>
 
