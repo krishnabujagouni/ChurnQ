@@ -11,9 +11,11 @@ export const metadata: Metadata = {
   description: "AI-native subscription retention platform. Cancel flow agent, payment recovery, churn prediction.",
   icons: {
     icon: [
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
       { url: "/churnQ-icon.svg", type: "image/svg+xml" },
     ],
-    shortcut: "/churnQ-icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/churnQ-icon.svg",
   },
 };
 
