@@ -11,11 +11,16 @@ export const metadata: Metadata = {
   description: "AI-native subscription retention platform. Cancel flow agent, payment recovery, churn prediction.",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/churnQ-icon.svg", type: "image/svg+xml" },
+      { url: "/favicon/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/favicon/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon/favicon.ico", rel: "shortcut icon" },
     ],
-    shortcut: "/icon.svg",
-    apple: "/churnQ-icon.svg",
+    shortcut: "/favicon/favicon.ico",
+    apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/favicon/site.webmanifest",
+  other: {
+    "apple-mobile-web-app-title": "ChurnQ",
   },
 };
 
