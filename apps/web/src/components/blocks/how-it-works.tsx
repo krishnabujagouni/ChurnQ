@@ -42,8 +42,8 @@ const STEPS: Step[] = [
   {
     step: "03",
     icon: Analytics01Icon,
-    accentColor: "#059669",
-    accentBg: "#ecfdf5",
+    accentColor: "#18181b",
+    accentBg: "#f4f4f5",
     title: "Watch revenue stay",
     description:
       "Saved subscribers appear in your dashboard instantly. MRR recovered, save rates, and churn reasons  all in one place.",
@@ -64,7 +64,7 @@ export function HowItWorks() {
             How it works
           </Badge>
           <h2 className="max-w-lg text-3xl font-bold tracking-tight text-[#09090b] md:text-4xl leading-tight">
-            Live in <span className="text-violet-600">three steps.</span>
+            Live in three steps.
           </h2>
           <p className="text-muted-foreground max-w-md text-base">
             Drop one script tag and ChurnQ does the rest  no webhook

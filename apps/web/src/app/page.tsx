@@ -25,9 +25,6 @@ import {
   Mail01Icon,
 } from "@hugeicons/core-free-icons";
 
-/* ─── Design tokens (aligned with globals.css) ─────────────────────────── */
-const E = "var(--cs-success)";
-const EL = "var(--cs-success-soft)";
 
 
 
@@ -330,7 +327,7 @@ export default function LandingPage() {
       <section id="features" style={{ background: "var(--cs-bg)", padding: "96px 0", borderTop: "1px solid var(--cs-border)", scrollMarginTop: 72 }}>
         <div className="lnd-shell">
           <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <div style={{ display: "inline-block", background: EL, color: E, fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 99, marginBottom: 14, letterSpacing: "0.02em", border: "1px solid rgba(5,150,105,0.2)" }}>Features</div>
+            <div style={{ display: "inline-block", background: "#f4f4f5", color: "#18181b", fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 99, marginBottom: 14, letterSpacing: "0.02em", border: "1px solid #e4e4e7" }}>Features</div>
             <h2 style={{ fontSize: "clamp(26px, 3.5vw, 36px)", fontWeight: 700, color: "var(--cs-text)", margin: 0, letterSpacing: "-0.03em" }}>
               Everything you need to stop losing subscribers
             </h2>
