@@ -174,8 +174,6 @@ export function RecoveryTable({ rows }: { rows: RecoveryRow[] }) {
     });
   }, [rows, statusFilter, failureFilter, search]);
 
-  const active    = filtered.filter((r) => r.status === "pending").length;
-  const exhausted = filtered.filter((r) => r.status === "exhausted").length;
   const filtersActive = search.trim() !== "" || statusFilter !== "all" || failureFilter !== "All";
 
   const table = useReactTable({
@@ -191,20 +189,6 @@ export function RecoveryTable({ rows }: { rows: RecoveryRow[] }) {
 
   return (
     <div className="space-y-4">
-      {/* Stats strip */}
-      <div className="flex gap-3 flex-wrap">
-        {[
-          { label: "Showing",   value: filtered.length, cls: "bg-slate-50 text-slate-700" },
-          { label: "Active",    value: active,           cls: "bg-amber-50 text-amber-700" },
-          { label: "Exhausted", value: exhausted,        cls: "bg-red-50 text-red-700" },
-        ].map((p) => (
-          <div key={p.label} className={`${p.cls} rounded-lg px-4 py-2.5 flex flex-col gap-0.5`}>
-            <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60">{p.label}</span>
-            <span className="text-xl font-bold">{p.value}</span>
-          </div>
-        ))}
-      </div>
-
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center bg-white border border-border rounded-lg p-3">
         <input
