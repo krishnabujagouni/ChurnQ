@@ -99,7 +99,7 @@ export default async function PaymentRecoveryPage() {
         </h1>
         <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0", maxWidth: 680 }}>
           When a subscriber&apos;s payment fails, ChurnQ automatically retries it and sends them a
-          personalised email — no action needed from you. You&apos;ll get a summary every Monday morning.
+          personalised email  no action needed from you. You&apos;ll get a summary every Monday morning.
         </p>
       </div>
 
@@ -141,7 +141,7 @@ export default async function PaymentRecoveryPage() {
         }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>✓</div>
           <div style={{ fontWeight: 600, fontSize: 15, color: "var(--cs-text, #18181b)", marginBottom: 4 }}>
-            All clear — no failed payments
+            All clear  no failed payments
           </div>
           <div style={{ fontSize: 13 }}>
             If a subscriber&apos;s payment fails, it&apos;ll show up here and ChurnQ will

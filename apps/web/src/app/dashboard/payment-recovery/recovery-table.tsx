@@ -110,7 +110,7 @@ const columns: ColumnDef<RecoveryRow>[] = [
     cell: ({ row }) => {
       const { nextRetryAt, status } = row.original;
       if (status === "exhausted" || !nextRetryAt) {
-        return <span className="text-sm text-muted-foreground">—</span>;
+        return <span className="text-sm text-muted-foreground"></span>;
       }
       const d = new Date(nextRetryAt);
       const diffH = Math.round((d.getTime() - Date.now()) / 3_600_000);
@@ -132,7 +132,7 @@ const columns: ColumnDef<RecoveryRow>[] = [
     header: ({ column }) => <DataGridColumnHeader column={column} title="Last Error" />,
     cell: ({ getValue }) => {
       const v = getValue() as string | null;
-      if (!v) return <span className="text-muted-foreground text-sm">—</span>;
+      if (!v) return <span className="text-muted-foreground text-sm"></span>;
       return (
         <span className="text-xs text-muted-foreground truncate max-w-[200px] block" title={v}>{v}</span>
       );
