@@ -66,7 +66,7 @@
 
 **The only code path that charges the tenant (Stripe Connect):**
 - **`apps/web/src/app/api/cron/billing-sweep/route.ts`**  Vercel cron **`0 6 1 * *`** (1st of every month, **06:00 UTC**). Declared in **`apps/web/vercel.json`**. Call manually: `GET` with header **`Authorization: Bearer <CRON_SECRET>`** (same pattern as webhook-cleanup cron).
-- Loads `save_sessions` where `offer_accepted = true`, `fee_billed_at` IS NULL, `fee_charged` > 0, `outcome_confirmed_at` IS NOT NULL (and within the sweep’s period logic). **Groups by `tenant_id`**, sums fees, creates **`paymentIntents.create`** on the tenant’s **`stripe_connect_id`**, then sets **`fee_billed_at`** + **`stripe_charge_id`** (PI id) on every session in that batch. Stripe client uses API version **`2025-02-24.acacia`** (must match installed `stripe` types).
+- Loads `save_sessions` where `offer_acceptedt = true`, `fee_billed_at` IS NULL, `fee_charged` > 0, `outcome_confirmed_at` IS NOT NULL (and within the sweep’s period logic). **Groups by `tenant_id`**, sums fees, creates **`paymentIntents.create`** on the tenant’s **`stripe_connect_id`**, then sets **`fee_billed_at`** + **`stripe_charge_id`** (PI id) on every session in that batch. Stripe client uses API version **`2025-02-24.acacia`** (must match installed `stripe` types).
 
 **Confirmation without charging:**
 - **`apps/agents/src/churnq_agents/workers/stripe_worker.py`**  **`handle_invoice_paid`** only stamps **`outcome_confirmed_at`**, **`saved_value`**, **`fee_charged`** from invoice amount for **`DEFERRED_OFFER_TYPES`**: `extension`, `discount`, `downgrade`, **`pause`**. It does **not** create a Connect charge (immediate charge helper removed).
@@ -1258,5 +1258,154 @@ Settings Page
 41	Toggle Switch	On/off for allow-pause, allow-extension, allow-downgrade
 42	Select Dropdown	Styled <select> for discount % and duration options
 43	Textarea Input	Custom message field with char count
+
+---
+
+## Feature Internals: How Each Core Feature Works
+
+### 1. Cancel Agent (AI Retention Chat)
+
+**What it does:** When a subscriber clicks cancel, an AI-powered chat widget intercepts the attempt, understands their reason, and makes a personalized retention offer.
+
+**Flow:**
+
+```
+Embed JS (cancel click) → POST /api/public/cancel-intent  → creates SaveSession (triggerType=cancel_attempt)
+                                                                    ↓
+Embed JS (chat turn)    → POST /api/public/cancel-chat    → streams Claude response + optional makeOffer tool call
+                                                                    ↓
+Embed JS (offer shown)  → GET  /api/public/cancel-chat/offer → polls pendingOffer from session
+                                                                    ↓
+Subscriber accepts      → POST /api/public/cancel-outcome  → applies offer in Stripe, marks offerAccepted=true
+```
+
+**Key files:**
+- [cancel-intent/route.ts](apps/web/src/app/api/public/cancel-intent/route.ts) — creates the `SaveSession`, verifies HMAC auth, stores `subscriberId`, `subscriptionMrr`, `stripeSubscriptionId`
+- [cancel-chat/route.ts](apps/web/src/app/api/public/cancel-chat/route.ts) — streams Claude (Haiku/Sonnet) with a personalized system prompt; runs injection/forgery sanitization on all incoming messages; uses `makeOffer` tool to surface a structured offer
+- [cancel-agent.ts](apps/web/src/lib/cancel-agent.ts) — builds the system prompt from subscriber context (MRR, risk class, cancel history, merchant offer settings); enforces MRR-based discount caps (≥$200 → 40%, ≥$50 → 25%, else 10%)
+- [cancel-outcome/route.ts](apps/web/src/app/api/public/cancel-outcome/route.ts) — applies the offer in Stripe (coupon, pause, downgrade, extension), fires Slack/Discord/webhook alerts, stamps `offerAccepted=true`
+
+**Offer types the agent can make:**
+
+| Type | What happens in Stripe |
+|---|---|
+| `discount` | Creates/reuses a `ChurnQ_ret_{pct}p_{months}m` coupon, applies to subscription |
+| `pause` | Sets `pause_collection` on the subscription |
+| `downgrade` | Swaps to cheaper price ID (`proration_behavior: none`, effective next cycle) |
+| `extension` | Adds free trial days to the current period |
+| `empathy` | No Stripe action — logged as a save attempt with no financial offer |
+
+**Anti-abuse:**
+- Prompt injection patterns detected and neutralized in `parseMessages`
+- Rate limited per `embedPublicId:sessionId`
+- If subscriber already has an active accepted save (not yet billed), `offersLocked=true` is passed to the system prompt — agent can only offer empathy, no financial incentives (prevents double-dipping)
+- Max 32 messages per session, 12,000 chars per message, 2 LLM steps per turn
+
+---
+
+### 2. Churn Risk Prediction
+
+**What it does:** Runs daily for every tenant, scores all subscribers with a heuristic risk model, alerts the merchant, and automatically sends proactive retention emails to high-risk subscribers.
+
+**Schedule:** APScheduler cron — daily at **02:00 UTC** via `_run_churn_prediction_all` in [queue.py](apps/agents/src/churnq_agents/jobs/queue.py).
+
+**Scoring formula** ([churn_prediction.py:32-37](apps/agents/src/churnq_agents/agents/churn_prediction.py#L32-L37)):
+
+```
+score = 0.40 × (failed_payments / 3)
+      + 0.35 × (cancel_attempts / 2)
+      + 0.25 × (days_since_activity / 90)
+```
+All three components are clamped to [0, 1]. Score range: 0.0–1.0.
+
+**Risk classes:**
+- `high` — score ≥ 0.60
+- `medium` — score ≥ 0.30
+- `low` — score < 0.30
+
+**Data sources (last 90 days):**
+- `save_sessions` — cancel attempts and last activity date per subscriber
+- `stripe_events` — `invoice.payment_failed` count per customer
+
+**What happens after scoring:**
+1. Upserts all scores into `churn_predictions` table (`ON CONFLICT ... DO UPDATE`)
+2. For each **high-risk** subscriber:
+   - Calls `outreach.send_proactive_outreach` — Claude Haiku generates a personalized retention email and sends via Resend
+   - Posts alert to **Slack** webhook (if configured) with score, cancel attempts, failed payments, days inactive
+   - Posts alert to **Discord** webhook (if configured) — same fields
+   - Fires signed `high_risk.detected` webhook to any merchant-configured webhook endpoints (3 attempts, 5s timeout, HMAC-SHA256 signed)
+3. Sends the merchant an alert email summarizing count of high-risk subscribers found
+
+**Key files:**
+- [churn_prediction.py](apps/agents/src/churnq_agents/agents/churn_prediction.py) — full pipeline
+- [outreach.py](apps/agents/src/churnq_agents/agents/outreach.py) — proactive email generation
+
+---
+
+### 3. Proactive AI Outreach (High-Risk Emails)
+
+**What it does:** When churn prediction identifies a high-risk subscriber, Claude Haiku automatically drafts and sends a personalized retention email on the merchant's behalf.
+
+**Flow** ([outreach.py](apps/agents/src/churnq_agents/agents/outreach.py)):
+
+1. **Look up email** — queries `payment_retries` for the most recent `customer_email` seen for this subscriber (sourced from Stripe invoice data)
+2. **Generate content** — Claude Haiku prompt includes: risk signals (cancel attempts, failed payments, days inactive), MRR tier, and an offer hint calibrated by MRR:
+   - ≥ $200/mo → up to 40% off 3 months or dedicated success call
+   - ≥ $50/mo → up to 25% off 2 months or 1-month pause
+   - < $50/mo → 1-week extension or lower-tier plan
+3. **Store session** — inserts a `SaveSession` with `trigger_type='prediction_outreach'` and the full email content + risk signals in `transcript` (visible in merchant dashboard)
+4. **Send email** — via Resend. Falls back to static template if no Anthropic API key or Claude call fails
+
+**Key files:**
+- [outreach.py](apps/agents/src/churnq_agents/agents/outreach.py)
+
+---
+
+### 4. Payment Recovery (Failed Payment Retry)
+
+**What it does:** When Stripe reports a failed invoice payment, ChurnQ classifies the failure, sends an AI-generated recovery email to the subscriber, and schedules automatic Stripe retry attempts — up to 3 times depending on the failure type.
+
+**Flow:**
+
+```
+Stripe webhook (invoice.payment_failed)
+  → POST /webhooks/stripe  (signature verified, stored in stripe_events)
+  → background: stripe_worker.process_stripe_event_by_id
+      → payment_recovery.handle_invoice_payment_failed
+          ├── classify_payment_failure (Stripe decline code → failure class)
+          ├── send_recovery_email (Claude Haiku → Resend)
+          └── _schedule_retries (INSERT into payment_retries)
+                    ↓
+APScheduler (every hour): _sweep_payment_retries
+  ├── stripe.Invoice.pay() — actual Stripe retry
+  ├── send_recovery_email — follow-up email
+  ├── if max_attempts reached → status='exhausted' + subscriber_flags.payment_wall_active=true
+  └── else → advance to next delay slot, status='pending'
+                    ↓
+APScheduler (Monday 04:30 UTC): run_payment_recovery_summary
+  → weekly merchant email: total handled, recovered, pending, exhausted
+```
+
+**Failure classification and retry schedule** ([payment_recovery.py:26-48](apps/agents/src/churnq_agents/agents/payment_recovery.py#L26-L48)):
+
+| Failure class | Stripe codes | Max retries | Schedule |
+|---|---|---|---|
+| `insufficient_funds` | `insufficient_funds` | 3 | 72h → 168h → 336h |
+| `card_declined` | `card_declined` | 2 | 24h → 72h |
+| `try_again_later` | `processing_error`, `try_again_later` | 3 | 1h → 6h → 24h |
+| `expired_card` | `expired_card` | 0 | Email only, no retry |
+| `authentication_or_cvc` | `incorrect_cvc` | 0 | Email only, no retry |
+| `invalid_account` | `incorrect_number`, `invalid_expiry_*` | 0 | Email only, no retry |
+| `unknown` / `other` | anything else | 2 | 72h → 168h |
+
+**AI email generation:** Claude Haiku writes a personalized subject + body. If customer action is needed (e.g. expired card), email includes a CTA to update payment method. If auto-retry will handle it, email reassures the subscriber no action is needed. Falls back to static templates if Anthropic key is unavailable.
+
+**After all retries exhausted:** `subscriber_flags.payment_wall_active = true` is set — the cancel widget can use this to show a payment wall instead of retention offers.
+
+**Key files:**
+- [payment_recovery.py](apps/agents/src/churnq_agents/agents/payment_recovery.py) — classification, email generation, retry scheduling, weekly summary
+- [stripe_worker.py](apps/agents/src/churnq_agents/workers/stripe_worker.py) — event dispatch
+- [webhooks/stripe.py](apps/agents/src/churnq_agents/webhooks/stripe.py) — webhook ingress + signature verification
+- [queue.py](apps/agents/src/churnq_agents/jobs/queue.py#L53) — hourly retry sweep (`_sweep_payment_retries`)
 44	Save Button	Primary action, shows loading/success state
 45	Danger Zone Card	Red-bordered section for destructive actions

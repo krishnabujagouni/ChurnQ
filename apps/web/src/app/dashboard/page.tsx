@@ -82,7 +82,7 @@ async function getMetrics(tenantId: string) {
   };
 }
 
-function Card({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: string }) {
+function Card({ label, value, sub, subHref, accent }: { label: string; value: string; sub?: string; subHref?: string; accent?: string }) {
   return (
     <div style={{
       background: "var(--cs-surface, #fff)",
@@ -95,7 +95,11 @@ function Card({ label, value, sub, accent }: { label: string; value: string; sub
     }}>
       <div style={{ fontSize: 11, color: "var(--cs-text-muted, #71717a)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
       <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8, color: accent ?? "var(--cs-text, #18181b)", letterSpacing: "-0.02em" }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: "var(--cs-text-muted, #71717a)", marginTop: 6 }}>{sub}</div>}
+      {sub && (
+        subHref
+          ? <a href={subHref} style={{ fontSize: 12, color: "var(--cs-text-muted, #71717a)", marginTop: 6, display: "block", textDecoration: "none" }}>{sub}</a>
+          : <div style={{ fontSize: 12, color: "var(--cs-text-muted, #71717a)", marginTop: 6 }}>{sub}</div>
+      )}
     </div>
   );
 }
@@ -200,7 +204,7 @@ export default async function DashboardPage() {
         <Card label="MRR Saved" value={`$${m.month.savedValue.toFixed(2)}`} sub="This month" />
         <Card label="Fees Earned" value={`$${m.month.fees.toFixed(2)}`} sub={`All-time: $${m.allTime.fees.toFixed(2)}`} />
         <a href="/dashboard/subscribers" style={{ flex: 1, minWidth: 180, textDecoration: "none" }}>
-          <Card label="High-Risk Users" value={String(m.highRisk)} sub={`${m.pendingRetries} payment retries pending · view all →`} accent={m.highRisk > 0 ? "#dc2626" : undefined} />
+          <Card label="High-Risk Users" value={String(m.highRisk)} sub={`${m.pendingRetries} payment retries pending · view all →`} subHref="/dashboard/payment-recovery" accent={m.highRisk > 0 ? "#dc2626" : undefined} />
         </a>
       </div>
 

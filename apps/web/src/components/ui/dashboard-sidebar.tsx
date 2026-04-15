@@ -16,6 +16,7 @@ import {
   ArrowLeft01Icon,
   Plug01Icon,
   CreditCardIcon,
+  RecoveryMailIcon,
 } from "@hugeicons/core-free-icons";
 import {
   InfoCard,
@@ -45,6 +46,7 @@ const mainNav: NavItem[] = [
   { icon: SourceCodeIcon,      title: "Integration",     href: "/dashboard/integration" },
   { icon: Plug01Icon,          title: "Connections",     href: "/dashboard/connections" },
   { icon: CreditCardIcon,     title: "Billing",         href: "/dashboard/billing" },
+  { icon: RecoveryMailIcon,   title: "Payment Recovery", href: "/dashboard/payment-recovery" },
 ];
 
 const bottomNav: NavItem[] = [
