@@ -192,14 +192,14 @@ export function SessionsTable({ sessions }: { sessions: SessionRow[] }) {
       {/* Stats strip */}
       <div className="flex gap-3 flex-wrap">
         {[
-          { label: "Total", value: filtered.length, cls: "bg-slate-50 text-slate-700" },
-          { label: "Saved", value: saved, cls: "bg-green-50 text-green-700" },
-          { label: "Cancelled", value: filtered.length - saved, cls: "bg-red-50 text-red-700" },
-          { label: "Save rate", value: `${saveRate}%`, cls: "bg-zinc-50 text-zinc-800" },
+          { label: "Total",     value: filtered.length },
+          { label: "Saved",     value: saved },
+          { label: "Cancelled", value: filtered.length - saved },
+          { label: "Save rate", value: `${saveRate}%` },
         ].map((p) => (
-          <div key={p.label} className={`${p.cls} rounded-lg px-4 py-2.5 flex flex-col gap-0.5`}>
-            <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60">{p.label}</span>
-            <span className="text-xl font-bold">{p.value}</span>
+          <div key={p.label} className="bg-[var(--cs-surface,#fff)] border border-[var(--cs-border,#e4e4e7)] rounded-lg px-4 py-2.5 flex flex-col gap-0.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--cs-text-muted,#71717a)]">{p.label}</span>
+            <span className="text-xl font-bold text-[var(--cs-text,#18181b)]">{p.value}</span>
           </div>
         ))}
       </div>

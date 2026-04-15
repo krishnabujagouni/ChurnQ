@@ -9,7 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
 
 type OfferRow = {
@@ -29,13 +28,7 @@ type Summary = {
   bestOffer: string | null;
 };
 
-const OFFER_COLORS: Record<string, string> = {
-  discount:  "#7C3AED",
-  pause:     "#0369a1",
-  extension: "#92400e",
-  downgrade: "#9d174d",
-  empathy:   "#166534",
-};
+const BAR_COLOR = "#18181b";
 
 const PERIOD_OPTIONS = [
   { label: "All time", days: 0 },
@@ -48,9 +41,6 @@ function label(offerType: string | null) {
   return offerType.charAt(0).toUpperCase() + offerType.slice(1);
 }
 
-function color(offerType: string | null) {
-  return OFFER_COLORS[offerType ?? ""] ?? "#94a3b8";
-}
 
 export default function OfferAnalyticsPage() {
   const [days, setDays] = useState(0);
@@ -114,16 +104,16 @@ export default function OfferAnalyticsPage() {
       {summary && (
         <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
           {[
-            { label: "Total attempts",  value: summary.totalAttempts,                color: "#64748b", bg: "#f1f5f9" },
-            { label: "Total saved",     value: summary.totalSaves,                   color: "#166534", bg: "#dcfce7" },
-            { label: "Overall save rate", value: `${summary.overallSaveRate}%`,      color: "#7C3AED", bg: "#ede9fe" },
-            { label: "Best offer",      value: summary.bestOffer ? label(summary.bestOffer) : "", color: "#0369a1", bg: "#e0f2fe" },
+            { label: "Total attempts",    value: summary.totalAttempts },
+            { label: "Total saved",       value: summary.totalSaves },
+            { label: "Overall save rate", value: `${summary.overallSaveRate}%` },
+            { label: "Best offer",        value: summary.bestOffer ? label(summary.bestOffer) : "—" },
           ].map((c) => (
-            <div key={c.label} style={{ background: c.bg, borderRadius: 10, padding: "12px 20px", minWidth: 140 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: c.color, opacity: 0.75, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <div key={c.label} style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: 10, padding: "12px 20px", minWidth: 140 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 {c.label}
               </div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: c.color, marginTop: 4 }}>{c.value}</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: "#18181b", marginTop: 4 }}>{c.value}</div>
             </div>
           ))}
         </div>
@@ -150,11 +140,7 @@ export default function OfferAnalyticsPage() {
                   labelFormatter={(v: unknown) => label(String(v))}
                   contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
                 />
-                <Bar dataKey="saveRate" radius={[6, 6, 0, 0]}>
-                  {rows.filter(r => r.offerType !== null).map((r) => (
-                    <Cell key={r.offerType} fill={color(r.offerType)} />
-                  ))}
-                </Bar>
+                <Bar dataKey="saveRate" radius={[6, 6, 0, 0]} fill={BAR_COLOR} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -187,8 +173,8 @@ export default function OfferAnalyticsPage() {
                           borderRadius: 99,
                           fontSize: 11,
                           fontWeight: 600,
-                          background: color(r.offerType) + "22",
-                          color: color(r.offerType),
+                          background: "#f4f4f5",
+                          color: "#18181b",
                         }}>
                           {label(r.offerType)}
                         </span>
@@ -197,18 +183,18 @@ export default function OfferAnalyticsPage() {
                       <td style={{ padding: "12px 16px", color: "#374151" }}>{r.saves}</td>
                       <td style={{ padding: "12px 16px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <div style={{ width: 64, height: 5, background: "#f1f5f9", borderRadius: 99, overflow: "hidden" }}>
-                            <div style={{ width: `${r.saveRate}%`, height: "100%", background: color(r.offerType), borderRadius: 99 }} />
+                          <div style={{ width: 64, height: 5, background: "#e4e4e7", borderRadius: 99, overflow: "hidden" }}>
+                            <div style={{ width: `${r.saveRate}%`, height: "100%", background: "#18181b", borderRadius: 99 }} />
                           </div>
-                          <span style={{ fontWeight: 600, color: color(r.offerType) }}>{r.saveRate}%</span>
+                          <span style={{ fontWeight: 600, color: "#18181b" }}>{r.saveRate}%</span>
                         </div>
                       </td>
                       <td style={{ padding: "12px 16px", color: "#374151" }}>${r.avgMrr.toFixed(2)}</td>
-                      <td style={{ padding: "12px 16px", fontWeight: r.totalMrrSaved > 0 ? 600 : 400, color: r.totalMrrSaved > 0 ? "#166534" : "#94a3b8" }}>
-                        {r.totalMrrSaved > 0 ? `$${r.totalMrrSaved.toFixed(2)}` : ""}
+                      <td style={{ padding: "12px 16px", fontWeight: r.totalMrrSaved > 0 ? 600 : 400, color: r.totalMrrSaved > 0 ? "#18181b" : "#a1a1aa" }}>
+                        {r.totalMrrSaved > 0 ? `$${r.totalMrrSaved.toFixed(2)}` : "—"}
                       </td>
-                      <td style={{ padding: "12px 16px", color: r.totalFees > 0 ? "#7C3AED" : "#94a3b8", fontWeight: r.totalFees > 0 ? 600 : 400 }}>
-                        {r.totalFees > 0 ? `$${r.totalFees.toFixed(2)}` : ""}
+                      <td style={{ padding: "12px 16px", color: r.totalFees > 0 ? "#18181b" : "#a1a1aa", fontWeight: r.totalFees > 0 ? 600 : 400 }}>
+                        {r.totalFees > 0 ? `$${r.totalFees.toFixed(2)}` : "—"}
                       </td>
                     </tr>
                   ))}
