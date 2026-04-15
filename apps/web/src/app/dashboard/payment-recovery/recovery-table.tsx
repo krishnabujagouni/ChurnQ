@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   useReactTable, getCoreRowModel, getSortedRowModel, getPaginationRowModel,
   type ColumnDef, type SortingState,
@@ -42,6 +42,8 @@ const FAILURE_LABELS: Record<string, string> = {
   other:                 "Other",
 };
 
+const FAILURE_TYPES = ["All", "insufficient_funds", "card_declined", "expired_card", "authentication_or_cvc", "invalid_account", "try_again_later"] as const;
+
 function StatusPill({ status }: { status: string }) {
   const c = STATUS_COLORS[status] ?? { bg: "bg-slate-100", text: "text-slate-600" };
   const label = status.charAt(0).toUpperCase() + status.slice(1);
@@ -51,8 +53,6 @@ function StatusPill({ status }: { status: string }) {
     </span>
   );
 }
-
-type StatusFilter = "all" | "pending" | "exhausted";
 
 const columns: ColumnDef<RecoveryRow>[] = [
   {
@@ -64,9 +64,9 @@ const columns: ColumnDef<RecoveryRow>[] = [
       const id    = row.original.customerId;
       return (
         <div className="flex flex-col gap-0.5">
-          {email
-            ? <span className="text-sm font-medium text-foreground">{email}</span>
-            : <span className="text-sm text-muted-foreground italic">No email</span>}
+          <span className="text-sm font-medium text-foreground">
+            {email ?? <span className="italic text-muted-foreground">No email</span>}
+          </span>
           {id && <span className="text-xs text-muted-foreground">{id}</span>}
         </div>
       );
@@ -77,10 +77,9 @@ const columns: ColumnDef<RecoveryRow>[] = [
     accessorKey: "failureClass",
     meta: { headerTitle: "Failure Type", skeleton: <Skeleton className="h-4 w-32" /> },
     header: ({ column }) => <DataGridColumnHeader column={column} title="Failure Type" />,
-    cell: ({ getValue }) => {
-      const v = getValue() as string;
-      return <span className="text-sm text-foreground">{FAILURE_LABELS[v] ?? v}</span>;
-    },
+    cell: ({ getValue }) => (
+      <span className="text-sm text-foreground">{FAILURE_LABELS[getValue() as string] ?? (getValue() as string)}</span>
+    ),
     size: 160,
   },
   {
@@ -100,13 +99,9 @@ const columns: ColumnDef<RecoveryRow>[] = [
       if (maxAttempts === 0) {
         return <span className="text-sm text-muted-foreground">Email only</span>;
       }
-      return (
-        <span className="text-sm">
-          {attempts} / {maxAttempts}
-        </span>
-      );
+      return <span className="text-sm">{attempts} / {maxAttempts}</span>;
     },
-    size: 100,
+    size: 90,
   },
   {
     accessorKey: "nextRetryAt",
@@ -118,15 +113,8 @@ const columns: ColumnDef<RecoveryRow>[] = [
         return <span className="text-sm text-muted-foreground">—</span>;
       }
       const d = new Date(nextRetryAt);
-      const now = new Date();
-      const diffMs = d.getTime() - now.getTime();
-      const diffH = Math.round(diffMs / 3_600_000);
-      const label =
-        diffH <= 0
-          ? "Soon"
-          : diffH < 24
-          ? `in ${diffH}h`
-          : `in ${Math.round(diffH / 24)}d`;
+      const diffH = Math.round((d.getTime() - Date.now()) / 3_600_000);
+      const label = diffH <= 0 ? "Soon" : diffH < 24 ? `in ${diffH}h` : `in ${Math.round(diffH / 24)}d`;
       return (
         <div className="flex flex-col gap-0.5">
           <span className="text-sm">{label}</span>
@@ -136,7 +124,7 @@ const columns: ColumnDef<RecoveryRow>[] = [
         </div>
       );
     },
-    size: 120,
+    size: 110,
   },
   {
     accessorKey: "lastError",
@@ -146,9 +134,7 @@ const columns: ColumnDef<RecoveryRow>[] = [
       const v = getValue() as string | null;
       if (!v) return <span className="text-muted-foreground text-sm">—</span>;
       return (
-        <span className="text-xs text-muted-foreground truncate max-w-[200px] block" title={v}>
-          {v}
-        </span>
+        <span className="text-xs text-muted-foreground truncate max-w-[200px] block" title={v}>{v}</span>
       );
     },
     size: 200,
@@ -157,23 +143,40 @@ const columns: ColumnDef<RecoveryRow>[] = [
     accessorKey: "createdAt",
     meta: { headerTitle: "Failed At", skeleton: <Skeleton className="h-4 w-24" /> },
     header: ({ column }) => <DataGridColumnHeader column={column} title="Failed At" />,
-    cell: ({ getValue }) => {
-      const v = getValue() as string;
-      return (
-        <span className="text-sm text-muted-foreground whitespace-nowrap">
-          {new Date(v).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-        </span>
-      );
-    },
+    cell: ({ getValue }) => (
+      <span className="text-sm text-muted-foreground whitespace-nowrap">
+        {new Date(getValue() as string).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+      </span>
+    ),
     size: 120,
   },
 ];
 
 export function RecoveryTable({ rows }: { rows: RecoveryRow[] }) {
   const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
-  const [filter, setFilter] = useState<StatusFilter>("all");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "exhausted">("all");
+  const [failureFilter, setFailureFilter] = useState<(typeof FAILURE_TYPES)[number]>("All");
 
-  const filtered = filter === "all" ? rows : rows.filter((r) => r.status === filter);
+  const filtered = useMemo(() => {
+    return rows.filter((r) => {
+      if (statusFilter === "pending" && r.status !== "pending") return false;
+      if (statusFilter === "exhausted" && r.status !== "exhausted") return false;
+      if (failureFilter !== "All" && r.failureClass !== failureFilter) return false;
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        if (
+          !(r.customerEmail ?? "").toLowerCase().includes(q) &&
+          !(r.customerId ?? "").toLowerCase().includes(q)
+        ) return false;
+      }
+      return true;
+    });
+  }, [rows, statusFilter, failureFilter, search]);
+
+  const active    = filtered.filter((r) => r.status === "pending").length;
+  const exhausted = filtered.filter((r) => r.status === "exhausted").length;
+  const filtersActive = search.trim() !== "" || statusFilter !== "all" || failureFilter !== "All";
 
   const table = useReactTable({
     data: filtered,
@@ -186,34 +189,56 @@ export function RecoveryTable({ rows }: { rows: RecoveryRow[] }) {
     initialState: { pagination: { pageSize: 15 } },
   });
 
-  const filterBtn = (val: StatusFilter, label: string) => (
-    <button
-      type="button"
-      onClick={() => setFilter(val)}
-      style={{
-        fontSize: 12,
-        fontWeight: 500,
-        padding: "4px 12px",
-        borderRadius: 6,
-        border: "1px solid var(--cs-border, #e4e4e7)",
-        cursor: "pointer",
-        background: filter === val ? "var(--cs-accent, #18181b)" : "transparent",
-        color: filter === val ? "#fff" : "var(--cs-text-muted, #71717a)",
-        transition: "background 0.15s, color 0.15s",
-      }}
-    >
-      {label}
-    </button>
-  );
-
   return (
-    <div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-        {filterBtn("all", "All")}
-        {filterBtn("pending", "Active")}
-        {filterBtn("exhausted", "Exhausted")}
+    <div className="space-y-4">
+      {/* Stats strip */}
+      <div className="flex gap-3 flex-wrap">
+        {[
+          { label: "Showing",   value: filtered.length, cls: "bg-slate-50 text-slate-700" },
+          { label: "Active",    value: active,           cls: "bg-amber-50 text-amber-700" },
+          { label: "Exhausted", value: exhausted,        cls: "bg-red-50 text-red-700" },
+        ].map((p) => (
+          <div key={p.label} className={`${p.cls} rounded-lg px-4 py-2.5 flex flex-col gap-0.5`}>
+            <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60">{p.label}</span>
+            <span className="text-xl font-bold">{p.value}</span>
+          </div>
+        ))}
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 items-center bg-white border border-border rounded-lg p-3">
+        <input
+          type="text"
+          placeholder="Search email or customer ID…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 min-w-[180px] h-8 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+        <div className="flex gap-1.5">
+          {(["all", "pending", "exhausted"] as const).map((s) => (
+            <button key={s} type="button" onClick={() => setStatusFilter(s)}
+              className={`px-3 h-8 rounded-md text-xs font-medium border transition-colors ${statusFilter === s ? "bg-foreground text-background border-foreground" : "bg-background text-muted-foreground border-input hover:bg-muted"}`}>
+              {s === "all" ? "All" : s === "pending" ? "Active" : "Exhausted"}
+            </button>
+          ))}
+        </div>
+        <select value={failureFilter} onChange={(e) => setFailureFilter(e.target.value as typeof failureFilter)}
+          className="h-8 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
+          {FAILURE_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t === "All" ? "All failure types" : FAILURE_LABELS[t] ?? t}
+            </option>
+          ))}
+        </select>
+        {filtersActive && (
+          <button type="button" onClick={() => { setSearch(""); setStatusFilter("all"); setFailureFilter("All"); }}
+            className="h-8 px-3 rounded-md border border-input bg-background text-muted-foreground text-xs hover:bg-muted">
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Data Grid */}
       <DataGrid table={table} recordCount={filtered.length} tableLayout={{ headerSticky: true }}>
         <DataGridContainer>
           <div className="overflow-x-auto">

@@ -38,15 +38,15 @@ type NavItem = {
 };
 
 const mainNav: NavItem[] = [
-  { icon: DashboardCircleIcon, title: "Overview",        href: "/dashboard" },
-  { icon: UserGroupIcon,       title: "Subscribers",     href: "/dashboard/subscribers" },
-  { icon: Clock01Icon,         title: "Recent Sessions", href: "/dashboard/sessions" },
-  { icon: BarChartIcon,        title: "Offer Analytics", href: "/dashboard/offer-analytics" },
-  { icon: BubbleChatSparkIcon, title: "AI Analyst",      href: "/dashboard/feedback" },
-  { icon: SourceCodeIcon,      title: "Integration",     href: "/dashboard/integration" },
-  { icon: Plug01Icon,          title: "Connections",     href: "/dashboard/connections" },
-  { icon: CreditCardIcon,     title: "Billing",         href: "/dashboard/billing" },
-  { icon: RecoveryMailIcon,   title: "Payment Recovery", href: "/dashboard/payment-recovery" },
+  { icon: DashboardCircleIcon, title: "Overview",          href: "/dashboard" },
+  { icon: UserGroupIcon,       title: "Subscribers",       href: "/dashboard/subscribers" },
+  { icon: Clock01Icon,         title: "Recent Sessions",   href: "/dashboard/sessions" },
+  { icon: BarChartIcon,        title: "Offer Analytics",   href: "/dashboard/offer-analytics" },
+  { icon: RecoveryMailIcon,    title: "Payment Recovery",  href: "/dashboard/payment-recovery" },
+  { icon: BubbleChatSparkIcon, title: "AI Analyst",        href: "/dashboard/feedback" },
+  { icon: SourceCodeIcon,      title: "Integration",       href: "/dashboard/integration" },
+  { icon: Plug01Icon,          title: "Connections",       href: "/dashboard/connections" },
+  { icon: CreditCardIcon,      title: "Billing",           href: "/dashboard/billing" },
 ];
 
 const bottomNav: NavItem[] = [

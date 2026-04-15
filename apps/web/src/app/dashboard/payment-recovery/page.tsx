@@ -98,8 +98,8 @@ export default async function PaymentRecoveryPage() {
           Payment Recovery
         </h1>
         <p style={{ color: "#64748b", fontSize: 13, margin: "4px 0 0", maxWidth: 680 }}>
-          ChurnQ automatically retries failed Stripe invoices and sends AI-written recovery
-          emails to your subscribers. A weekly summary email is sent every Monday.
+          When a subscriber&apos;s payment fails, ChurnQ automatically retries it and sends them a
+          personalised email — no action needed from you. You&apos;ll get a summary every Monday morning.
         </p>
       </div>
 
@@ -108,24 +108,24 @@ export default async function PaymentRecoveryPage() {
         <KpiCard
           label="Total tracked"
           value={total}
-          sub="all-time failed invoices"
+          sub="failed invoices handled"
         />
         <KpiCard
-          label="Active retries"
+          label="Being retried"
           value={kpis.active}
-          sub="still being retried"
+          sub="waiting on next attempt"
           accent={kpis.active > 0 ? "#d97706" : undefined}
         />
         <KpiCard
           label="Likely recovered"
           value={kpis.likelyRecovered}
-          sub="retried without error (7d)"
+          sub="retried successfully this week"
           accent={kpis.likelyRecovered > 0 ? "#16a34a" : undefined}
         />
         <KpiCard
-          label="Exhausted"
+          label="Gave up"
           value={kpis.exhausted}
-          sub="no further retries"
+          sub="all retries used up"
           accent={kpis.exhausted > 0 ? "#dc2626" : undefined}
         />
       </div>
@@ -141,11 +141,11 @@ export default async function PaymentRecoveryPage() {
         }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>✓</div>
           <div style={{ fontWeight: 600, fontSize: 15, color: "var(--cs-text, #18181b)", marginBottom: 4 }}>
-            No failed payments on record
+            All clear — no failed payments
           </div>
           <div style={{ fontSize: 13 }}>
-            When Stripe sends an <code>invoice.payment_failed</code> event, ChurnQ will handle
-            retries and recovery emails automatically.
+            If a subscriber&apos;s payment fails, it&apos;ll show up here and ChurnQ will
+            start retrying automatically.
           </div>
         </div>
       ) : (
