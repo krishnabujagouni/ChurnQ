@@ -121,8 +121,8 @@ async def insert_stripe_event(
     async with pool().acquire() as conn:
         row = await conn.fetchrow(
             """
-            INSERT INTO stripe_events (tenant_id, stripe_event_id, type, payload, livemode)
-            VALUES ($1, $2, $3, $4::jsonb, $5)
+            INSERT INTO stripe_events (id, tenant_id, stripe_event_id, type, payload, livemode)
+            VALUES (gen_random_uuid(), $1, $2, $3, $4::jsonb, $5)
             ON CONFLICT (stripe_event_id) DO NOTHING
             RETURNING id
             """,
