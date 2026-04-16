@@ -181,7 +181,7 @@ async def _schedule_retries(
     delays = _RETRY_DELAYS.get(summary["failure_class"], [72, 168])
     if not delays:
         return
-    first_retry_at = datetime.now(timezone.utc) + timedelta(hours=delays[0])
+    first_retry_at = datetime.utcnow() + timedelta(hours=delays[0])
     async with _db.pool().acquire() as conn:
         import uuid as _uuid
         await conn.execute(
