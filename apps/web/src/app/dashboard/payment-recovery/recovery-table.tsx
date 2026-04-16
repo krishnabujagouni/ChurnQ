@@ -61,14 +61,10 @@ const columns: ColumnDef<RecoveryRow>[] = [
     header: ({ column }) => <DataGridColumnHeader column={column} title="Customer" />,
     cell: ({ row }) => {
       const email = row.original.customerEmail;
-      const id    = row.original.customerId;
       return (
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium text-foreground">
-            {email ?? <span className="italic text-muted-foreground">No email</span>}
-          </span>
-          {id && <span className="text-xs text-muted-foreground">{id}</span>}
-        </div>
+        <span className="text-sm font-medium text-foreground">
+          {email ?? <span className="italic text-muted-foreground">No email</span>}
+        </span>
       );
     },
     size: 220,
