@@ -13,6 +13,7 @@ const isPublic = createRouteMatcher([
   "/api/stripe/connect/(.*)",
   "/api/webhooks/(.*)",
   "/test-app/(.*)",
+  "/test-overlay.html",
 ]);
 
 export default clerkMiddleware((auth, req) => {
