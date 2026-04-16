@@ -129,7 +129,7 @@ async def insert_stripe_event(
             tenant_id,
             stripe_event_id,
             type_name,
-            json.dumps(payload),
+            json.dumps(payload, default=str),
             livemode,
         )
         return None if row is None else row["id"]
